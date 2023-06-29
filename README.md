@@ -5,4 +5,3 @@ This repository contains some codes for simulations of the game theoretical mode
 
 The simulation is implemented using Mesa, an agent-based modelling tool of Python.
 
-For the detailed design of the model, refer to https://hackmd.io/@soispoke/Sy-B_gaU2.
