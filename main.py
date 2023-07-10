@@ -9,13 +9,14 @@ import numpy as np
 
 from scipy.stats import poisson, norm
 from collections import deque
+import matplotlib.pyplot as plt
 import random
 from mesa import Agent, Model
 from mesa.time import RandomActivation, SimultaneousActivation
 
 
 class PlayerWithNaiveStrategy(Agent):
-    def __init__(self, unique_id, model, pm, rate_private, delay) :
+    def __init__(self, unique_id, model, pm, rate_private, delay):
         super().__init__(unique_id, model)
         self.private_lambda = rate_private
         self.pm = pm
@@ -28,18 +29,19 @@ class PlayerWithNaiveStrategy(Agent):
     def step(self):
         t = self.model.schedule.time  # get current time
         # Private signal
-        self.private_signal = poisson.rvs(self.private_lambda * t)
+        self.private_signal = poisson.rvs(mu = self.private_lambda * t)
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal + self.private_signal
 
-        self.bid_queue.append(self.bid)
-
-        if self.aggregated_signal > self.pm :
+        if self.aggregated_signal > self.pm:
             self.bid = self.aggregated_signal - self.pm
+
+        self.bid_queue.append(self.bid)
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay+self.model.global_delay:
             self.model.current_bids.append(self.bid_queue.popleft())
+            self.model.bid_agents.append(self.unique_id)
 
 
 class PlayerWithAdaptiveStrategy(Agent):
@@ -56,7 +58,7 @@ class PlayerWithAdaptiveStrategy(Agent):
     def step(self):
         t = self.model.schedule.time  # get current time
         # Private signal
-        self.private_signal = poisson.rvs(self.private_lambda * t)
+        self.private_signal = poisson.rvs(mu = self.private_lambda * t)
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal + self.private_signal
         # delta is a small constant value added to the current maximum bid
@@ -68,9 +70,12 @@ class PlayerWithAdaptiveStrategy(Agent):
             elif self.aggregated_signal - self.pm <= self.model.max_bids[-1-self.model.global_delay] + delta and self.aggregated_signal > self.pm:
                 self.bid = self.aggregated_signal - self.pm
 
+        self.bid_queue.append(self.bid)
+
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
             self.model.current_bids.append(self.bid_queue.popleft())
+            self.model.bid_agents.append(self.unique_id)
 
 
 class PlayerWithLastMinute(Agent):
@@ -88,7 +93,7 @@ class PlayerWithLastMinute(Agent):
     def step(self):
         t = self.model.schedule.time  # get current time
         # Private signal
-        self.private_signal = poisson.rvs(self.private_lambda * t)
+        self.private_signal = poisson.rvs(mu = self.private_lambda * t)
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal + self.private_signal
 
@@ -99,9 +104,12 @@ class PlayerWithLastMinute(Agent):
         else:
             self.bid = 0
 
+        self.bid_queue.append(self.bid)
+
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
             self.model.current_bids.append(self.bid_queue.popleft())
+            self.model.bid_agents.append(self.unique_id)
 
 
 class PlayerWithStealthStrategy(Agent) :
@@ -116,10 +124,10 @@ class PlayerWithStealthStrategy(Agent) :
         self.individual_delay = delay
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
 
-    def step(self) :
+    def step(self):
         t = self.model.schedule.time  # get current time
         # Private signal
-        self.private_signal = poisson.rvs(self.private_lambda * t)
+        self.private_signal = poisson.rvs(mu = self.private_lambda * t)
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal + self.private_signal
 
@@ -130,9 +138,12 @@ class PlayerWithStealthStrategy(Agent) :
         else:
             self.bid = 0
 
+        self.bid_queue.append(self.bid)
+
     def advance(self):
-        if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
+        if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
             self.model.current_bids.append(self.bid_queue.popleft())
+            self.model.bid_agents.append(self.unique_id)
 
 
 class PlayerWithBluffStrategy(Agent):
@@ -148,10 +159,10 @@ class PlayerWithBluffStrategy(Agent):
         self.individual_delay = delay
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
 
-    def step(self) :
+    def step(self):
         t = self.model.schedule.time  # get current time
         # Private signal
-        self.private_signal = poisson.rvs(self.private_lambda * t)
+        self.private_signal = poisson.rvs(mu = self.private_lambda * t)
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal + self.private_signal
 
@@ -162,9 +173,12 @@ class PlayerWithBluffStrategy(Agent):
         else:
             self.bid = 0
 
+        self.bid_queue.append(self.bid)
+
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
             self.model.current_bids.append(self.bid_queue.popleft())
+            self.model.bid_agents.append(self.unique_id)
 
 
 class Auction(Model):
@@ -175,10 +189,11 @@ class Auction(Model):
         self.num_stealth = S
         self.num_bluff = B
         self.public_lambda = rate_public
-
+        self.global_delay = delay
         self.max_bids = []
         self.current_bids = []
-        self.global_delay = delay
+        self.bid_agents = []
+        self.winning_agents = []
 
         # Create Agents
         self.schedule = SimultaneousActivation(self)
@@ -199,7 +214,7 @@ class Auction(Model):
         for i in range(self.num_lastminute):
             pm = np.random.uniform(0.001, 0.002)
             rate_private = np.random.uniform(0, 0.02)
-            time_reveal = random.randint(117, 119)
+            time_reveal = random.randint(230, 235)
             delay = random.randint(1, 3)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm, rate_private,
                                      time_reveal, delay)
@@ -208,7 +223,7 @@ class Auction(Model):
         for i in range(self.num_stealth):
             pm = np.random.uniform(0.001, 0.002)
             rate_private = np.random.uniform(0, 0.02)
-            time_reveal = random.randint(117, 119)
+            time_reveal = random.randint(230, 235)
             delay = random.randint(1, 3)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                           rate_private, time_reveal, delay)
@@ -217,43 +232,58 @@ class Auction(Model):
         for i in range(self.num_bluff) :
             pm = np.random.uniform(0.001, 0.002)
             rate_private = np.random.uniform(0, 0.02)
-            time_reveal = random.randint(117, 119)
-            bluff_value = random.randint(15, 16)
+            time_reveal = random.randint(230, 235)
+            bluff_value = random.randint(14, 16)
             delay = random.randint(1, 3)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
                                         self, pm, rate_private, time_reveal, bluff_value,delay)
             self.schedule.add(a)
 
         # Initialize public signal
-        self.public_signal = poisson.rvs(self.public_lambda * self.schedule.time)
+        self.public_signal = poisson.rvs(mu = self.public_lambda * self.schedule.time)
 
         # Intialize auction time
         self.T = norm.rvs(loc=T_mean, scale=T_sd)
-    def step(self) :
-        self.schedule.step()
 
+        # self.datacollector = mesa.DataCollector(
+        #     model_reporters={"Highest Bid:": self.max_bids[-1]},
+        #     agent_reporters={"Time": self.model.schedule.time}
+        # )
+    def step(self):
+        self.schedule.step()
         # Update public signal
-        self.public_signal = poisson.rvs(self.public_lambda * self.schedule.time)
+        self.public_signal = poisson.rvs(mu = self.public_lambda * self.schedule.time)
 
         if self.current_bids:
-            self.max_bids.append(max(self.current_bids))
+            max_bid = max(self.current_bids)
+            self.max_bids.append(max_bid)
+            winning_agent = self.bid_agents[self.current_bids.index(max_bid)]
+            self.winning_agents.append(winning_agent)
 
+        # self.datacollector.collect(self)
         self.current_bids.clear()
+        self.bid_agents.clear()
 
 
 # Setup and run the model
-model = Auction(100, 100, 20, 20, 2, rate_public=0.08, T_mean=12, T_sd=0.1, delay=1)
+model = Auction(100, 100, 20, 20, 2, rate_public=0.1, T_mean=12, T_sd=0.1, delay=1)
 
-for i in range(int(model.T * 10)) :
+for i in range(int(model.T * 20)):
     model.step()
 
+# model_data = model.datacollector.get_model_vars_dataframe()
+
 # Print winning bidder and highest bid
-highest_bid = max([a.bid for a in model.schedule.agents])
-winner = [a.unique_id for a in model.schedule.agents if a.bid == highest_bid]
-print(f"Winning bidder: {winner, highest_bid}")
+
 print(f"Public signal: {model.public_signal}")
 print(f"Auction time: {model.T}")
 print(f"Auction time: {model.schedule.time}")
 
-for a in model.schedule.agents:
-    print(f"Agent {a.unique_id} final bid: {a.bid}")
+for element in model.max_bids:
+    print(element)
+print(len(model.max_bids))
+
+print(model.winning_agents)
+print(len(model.winning_agents))
+plt.plot(model.max_bids)
+plt.show()
