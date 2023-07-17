@@ -6,15 +6,17 @@ import numpy as np
 def P(t, lambda_):
     return poisson.rvs(mu=lambda_ * t)
 
-lambda_ = 0.1
+lambda_ = 0.01
 
-times = np.arange(0, 240)
+times = 240
 
-random_variates = [P(t, lambda_) for t in times]
+for t in range (times+1):
+
+
 
 # Create the plot
 plt.figure(figsize=(10, 6))
-plt.plot(times, random_variates)
+plt.plot(times, total_signal)
 plt.xlabel('Time')
 plt.ylabel('P(t)')
 plt.title('Public Poisson Process')
@@ -24,7 +26,7 @@ plt.show()
 def E(t, lambda_):
     return poisson.rvs(mu=lambda_ * t)
 
-lambda_ = 0.01
+lambda_ = 0.1
 
 times = np.arange(0, 240)
 
