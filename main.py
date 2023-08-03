@@ -385,18 +385,27 @@ for i in range(len(model_data)) :
 all_bids = pd.concat(dfs)
 
 # Plot the data
-plt.figure(figsize=(20, 12))
-for column in all_bids.columns :
-    plt.plot(all_bids.index, all_bids[column], label=column)
+plt.figure(figsize=(20, 12), dpi=150)
+plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.columns))))
 
-plt.xlabel('Time Step')
-plt.ylabel('Bid Value')
-plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.title('Bids Received by Relay Across All Time Steps')
-plt.grid(True)
-plt.xticks(np.arange(0, 1200, 50))
-plt.yticks(np.arange(0, 400, 25))
+fontsize = 18
+for column in all_bids.columns:
+    plt.plot(all_bids.index, all_bids[column], label=column,linewidth=3)
+
+plt.xlabel('Time Step', fontsize=fontsize)
+plt.ylabel('Bid Value', fontsize=fontsize)
+plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=fontsize)
+plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
+plt.grid(False)
+plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
+plt.yticks(np.arange(0, 500, 50), fontsize=fontsize)
+plt.axvline(1200, color='k')
+plt.xlim(0), plt.ylim(-1)
 plt.show()
+
+print('Winning Agent ID: ' + str(model.winning_agents[-1:][0]))
+print('Winning bid value: ' + str(model.max_bids[-1:][0]))
+print('Winning bid time: ' + str(time_step) + ' ms')
 
 # for i in range(int(model.T * 20)):
 #     print(f"Data at time step {i}")
