@@ -1,8 +1,3 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
 import mesa
 import pandas as pd
 import numpy as np
@@ -190,11 +185,18 @@ class PlayerWithBluffStrategy(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
-def get_current_bids(model) :
+
+def get_current_bids(model):
     return model.show_current_bids
+
 
 def get_bid_agents(model):
     return model.show_bid_agents
+
+
+def get_public_signal(model):
+    return model.public_signal_value
+
 
 class Auction(Model):
     def __init__(self, N, A, L, S, B, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, T_mean, T_sd, delay) :
@@ -204,6 +206,8 @@ class Auction(Model):
         self.num_stealth = S
         self.num_bluff = B
         self.global_delay = delay
+
+        # Initialize bids
         self.max_bids = []
         self.current_bids = []
         self.bid_agents = []
@@ -212,12 +216,13 @@ class Auction(Model):
         self.show_bid_agents = []
 
         self.schedule = SimultaneousActivation(self)
-        # Initialize public signal
+
+        # Initialize signals
         self.public_signal = 0
         self.public_signal_value = 0
         self.private_signal = 0
 
-        # Intialize auction time
+        # Initialize auction time and rate parameters
         self.T = norm.rvs(loc=T_mean, scale=T_sd)
 
         self.public_lambda = norm.rvs(loc=rate_public_mean, scale=rate_public_sd)
@@ -226,22 +231,22 @@ class Auction(Model):
 
         # Create Agents
         for i in range(self.num_naive):
-            pm = np.random.uniform(0.001, 0.002)
+            pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
-            pm = np.random.uniform(0.001, 0.002)
+            pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_lastminute):
-            pm = np.random.uniform(0.001, 0.002)
-            time_reveal_delta = random.randint(3, 5)
+            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
@@ -250,8 +255,8 @@ class Auction(Model):
             self.schedule.add(a)
 
         for i in range(self.num_stealth):
-            pm = np.random.uniform(0.001, 0.002)
-            time_reveal_delta = random.randint(3, 5)
+            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
@@ -260,22 +265,26 @@ class Auction(Model):
             self.schedule.add(a)
 
         for i in range(self.num_bluff):
-            pm = np.random.uniform(0.001, 0.002)
-            time_reveal_delta = random.randint(3, 5)
+            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
-            bluff_value = random.randint(400,410)
+            bluff_value = np.random.uniform(0.17, 0.2)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
                                         self, pm, time_reveal_delta, time_estimate, bluff_value, delay, probability)
             self.schedule.add(a)
 
+        # Initialize data collector
         self.datacollector = mesa.DataCollector(
             model_reporters={
                 "Current Bids" : get_current_bids,
-                "Agents" : get_bid_agents
+                "Agents" : get_bid_agents,
+                "Public Signal" : get_public_signal
             },
-            agent_reporters={"Bid" : "bid"}
+            agent_reporters={"Bid" : "bid",
+                             "Probability": "probability"
+                             }
         )
 
     def step(self):
@@ -285,22 +294,23 @@ class Auction(Model):
         self.public_signal += new_public_signal
 
         for _ in range(new_public_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean= -11.66306, sigma = 3.05450)
             # Add the value of the current public signal to the total value
             self.public_signal_value += signal_value
 
+        # Update private signal
         new_private_signal = poisson.rvs(mu=self.private_lambda)
         self.private_signal += new_private_signal
 
-        for agent in self.schedule.agents:
-            for _ in range (new_private_signal):
-                private_signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+        for _ in range (new_private_signal):
+            private_signal_value = np.random.lognormal(mean = -8.41975, sigma = 1.95231)
+            for agent in self.schedule.agents:
                 if random.random() < agent.probability:
                     agent.private_signal_value += private_signal_value
 
-
         self.schedule.step()
 
+        # Select the winner of the step
         if self.current_bids :
             max_bid = max(self.current_bids)
             self.max_bids.append(max_bid)
@@ -313,23 +323,28 @@ class Auction(Model):
         self.current_bids.clear()
         self.bid_agents.clear()
 
+        # Collect data at the end of the step
         self.datacollector.collect(self)
 
+
 # Setup and run the model
-model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.1, rate_public_sd=0, rate_private_mean=0.1, rate_private_sd=0,
+model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
                 T_mean=12, T_sd=0.1, delay=3)
 
 for i in range(int(model.T * 100)):
     model.step()
+
 # Data Collection
 model_data = model.datacollector.get_model_vars_dataframe()
 agent_data = model.datacollector.get_agent_vars_dataframe()
 
-
-print(f"Public signal: {model.public_signal}")
-print(f"Public signal Value: {model.public_signal_value}")
+# Print the simulation details
+print(f"Public signal number: {model.public_signal}")
+print(f"Public signal value: {model.public_signal_value}")
+print(f"Private signal number: {model.private_signal}")
 print(f"Auction time (seconds): {model.T}")
 print(f"Auction time steps: {model.schedule.time}")
+print(agent_data.loc[i, 'Probability'])
 
 print(f"Winning Bid of Each Step: {model.max_bids}")
 print(f"Final Winning Bids: {model.max_bids[-1]}")
@@ -365,6 +380,8 @@ for i in range(len(model_data)) :
 
 all_bids = pd.concat(dfs)
 
+public_signals = model_data["Public Signal"]
+
 # Plot the data
 plt.figure(figsize=(20, 12))
 plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.columns))))
@@ -372,16 +389,16 @@ plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.
 fontsize = 12
 for column in all_bids.columns:
     plt.plot(all_bids.index, all_bids[column], label=column,linewidth=2)
-
+plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=2, color='green')
 plt.xlabel('Time Step', fontsize=fontsize)
 plt.ylabel('Bid Value', fontsize=fontsize)
-plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=fontsize)
+plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=12)
 plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
 plt.grid(False)
 plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-plt.yticks(np.arange(0, 500, 50), fontsize=fontsize)
+plt.yticks(np.arange(0, 0.2, 0.01), fontsize=fontsize)
 plt.axvline(1200, color='k')
-plt.xlim(0), plt.ylim(-1)
+plt.xlim(0), plt.ylim(0)
 plt.show()
 
 
