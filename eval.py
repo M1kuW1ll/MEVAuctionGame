@@ -1,6 +1,9 @@
 import random
 import pandas as pd
 
+from main import Auction
+
+
 def generate_strategies(fixed_strategy=None, manual_values=None):
     if manual_values:
         return manual_values
