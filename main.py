@@ -237,7 +237,7 @@ def get_aggregated_signal_max(model):
 
 
 class Auction(Model):
-    def __init__(self, N, A, L, S, B, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, T_mean, T_sd, delay) :
+    def __init__(self, N, A, L, S, B, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, T_mean, T_sd, delay, probability_mean, probability_std) :
         self.num_naive = N
         self.num_adapt = A
         self.num_lastminute = L
@@ -261,6 +261,9 @@ class Auction(Model):
         self.private_signal = 0
         self.private_signal_max = 0
         self.aggregated_signal_max = 0
+        self.probability_mean = 0
+        self.probability_std = 0
+
 
         # Initialize auction time and rate parameters
         self.T = norm.rvs(loc=T_mean, scale=T_sd)
@@ -273,14 +276,14 @@ class Auction(Model):
         for i in range(self.num_naive):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            probability = np.random.uniform(self.probability_mean, self.probability_std)
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            probability = np.random.uniform(self.probability_mean, self.probability_std)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability)
             self.schedule.add(a)
 
@@ -289,7 +292,7 @@ class Auction(Model):
             time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            probability = np.random.uniform(self.probability_mean, self.probability_std)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
                                      time_reveal_delta, time_estimate, delay, probability)
             self.schedule.add(a)
@@ -299,7 +302,7 @@ class Auction(Model):
             time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            probability = np.random.uniform(self.probability_mean, self.probability_std)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                          time_reveal_delta, time_estimate, delay, probability)
             self.schedule.add(a)
@@ -310,7 +313,7 @@ class Auction(Model):
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             bluff_value = np.random.uniform(0.17, 0.2)
             delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            probability = np.random.uniform(self.probability_mean, self.probability_std)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
                                         self, pm, time_reveal_delta, time_estimate, bluff_value, delay, probability)
             self.schedule.add(a)
@@ -375,7 +378,7 @@ class Auction(Model):
 
 # Setup and run the model
 model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=3)
+                T_mean=12, T_sd=0.1, delay=3, probability_mean = 0.8, probability_std = 1.0)
 
 for i in range(int(model.T * 100)):
     model.step()
