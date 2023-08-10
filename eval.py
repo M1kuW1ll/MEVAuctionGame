@@ -24,7 +24,7 @@ def run_simulation(strategies, delay, num_simulations):
     for _ in range(num_simulations):
         N, A, L, S, B = strategies.values()
         model = Auction(N, A, L, S, B, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                        T_mean=12, T_sd=0.1, delay=delay, probability_mean = 0.8, probability_std = 1.0)
+                        T_mean=12, T_sd=0.1, delay=delay)
         for i in range(int(model.T * 100)):
             model.step()
         time_step = int(model.T * 100) - 1
