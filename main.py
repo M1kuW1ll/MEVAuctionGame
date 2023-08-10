@@ -23,6 +23,7 @@ class PlayerWithNaiveStrategy(Agent):
         self.individual_delay = delay
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
+        self.bid_count = 0
 
     def step(self):
 
@@ -39,6 +40,11 @@ class PlayerWithNaiveStrategy(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
+        if len(self.bid_queue) == 1:
+            self.bid_count += 1
+        elif self.bid_queue[-1] != self.bid_queue[-2]:
+            self.bid_count +=1
+
 
 class PlayerWithAdaptiveStrategy(Agent):
     def __init__(self, unique_id, model, pm, delay, probability):
@@ -51,6 +57,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         self.individual_delay = delay
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
+        self.bid_count = 0
 
     def step(self):
 
@@ -73,6 +80,11 @@ class PlayerWithAdaptiveStrategy(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
+        if len(self.bid_queue) == 1:
+            self.bid_count += 1
+        elif self.bid_queue[-1] != self.bid_queue[-2]:
+            self.bid_count +=1
+
 
 class PlayerWithLastMinute(Agent):
     def __init__(self, unique_id, model, pm, time_reveal_delta, time_estimate, delay, probability) :
@@ -87,6 +99,7 @@ class PlayerWithLastMinute(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.time_estimate = time_estimate
         self.probability = probability
+        self.bid_count = 0
 
     def step(self):
         t = self.model.schedule.time
@@ -110,6 +123,11 @@ class PlayerWithLastMinute(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
+        if len(self.bid_queue) == 1:
+            self.bid_count += 1
+        elif self.bid_queue[-1] != self.bid_queue[-2]:
+            self.bid_count +=1
+
 
 class PlayerWithStealthStrategy(Agent):
     def __init__(self, unique_id, model, pm, time_reveal_delta, time_estimate, delay, probability):
@@ -124,6 +142,7 @@ class PlayerWithStealthStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.time_estimate = time_estimate
         self.probability = probability
+        self.bid_count = 0
 
     def step(self):
         t = self.model.schedule.time  # get current time
@@ -147,6 +166,11 @@ class PlayerWithStealthStrategy(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
+        if len(self.bid_queue) == 1:
+            self.bid_count += 1
+        elif self.bid_queue[-1] != self.bid_queue[-2]:
+            self.bid_count +=1
+
 
 class PlayerWithBluffStrategy(Agent):
     def __init__(self, unique_id, model, pm, time_reveal_delta, time_estimate, bluff_value, delay, probability):
@@ -162,6 +186,7 @@ class PlayerWithBluffStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.time_estimate = time_estimate
         self.probability = probability
+        self.bid_count = 0
 
     def step(self) :
         t = self.model.schedule.time  # get current time
@@ -185,6 +210,11 @@ class PlayerWithBluffStrategy(Agent):
             self.model.current_bids.append(self.bid_queue.popleft())
             self.model.bid_agents.append(self.unique_id)
 
+        if len(self.bid_queue) == 1:
+            self.bid_count += 1
+        elif self.bid_queue[-1] != self.bid_queue[-2]:
+            self.bid_count +=1
+
 
 def get_current_bids(model):
     return model.show_current_bids
@@ -197,8 +227,10 @@ def get_bid_agents(model):
 def get_public_signal(model):
     return model.public_signal_value
 
+
 def get_private_signal_max(model):
     return model.private_signal_max
+
 
 def get_aggregated_signal_max(model):
     return model.aggregated_signal_max
@@ -286,14 +318,15 @@ class Auction(Model):
         # Initialize data collector
         self.datacollector = mesa.DataCollector(
             model_reporters={
-                "Current Bids" : get_current_bids,
-                "Agents" : get_bid_agents,
-                "Public Signal" : get_public_signal,
+                "Current Bids": get_current_bids,
+                "Agents": get_bid_agents,
+                "Public Signal": get_public_signal,
                 "Private Signal Max": get_private_signal_max,
                 "Aggregated Signal Max": get_aggregated_signal_max
             },
-            agent_reporters={"Bid" : "bid",
-                             "Probability": "probability"
+            agent_reporters={"Bid": "bid",
+                             "Probability": "probability",
+                             "Bid Count": "bid_count"
                              }
         )
 
@@ -304,7 +337,7 @@ class Auction(Model):
         self.public_signal += new_public_signal
 
         for _ in range(new_public_signal) :
-            signal_value = np.random.lognormal(mean= -11.66306, sigma = 3.05450)
+            signal_value = np.random.lognormal(mean=-11.66306, sigma=3.05450)
             # Add the value of the current public signal to the total value
             self.public_signal_value += signal_value
 
@@ -313,7 +346,7 @@ class Auction(Model):
         self.private_signal += new_private_signal
 
         for _ in range (new_private_signal):
-            private_signal_value = np.random.lognormal(mean = -8.41975, sigma = 1.95231)
+            private_signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_max += private_signal_value
             for agent in self.schedule.agents:
                 if random.random() < agent.probability:
@@ -324,7 +357,7 @@ class Auction(Model):
         self.schedule.step()
 
         # Select the winner of the step
-        if self.current_bids :
+        if self.current_bids:
             max_bid = max(self.current_bids)
             self.max_bids.append(max_bid)
             winning_agent = self.bid_agents[self.current_bids.index(max_bid)]
@@ -357,8 +390,11 @@ print(f"Public signal value: {model.public_signal_value}")
 print(f"Private signal number: {model.private_signal}")
 print(f"Auction time (seconds): {model.T}")
 print(f"Auction time steps: {model.schedule.time}")
+print("\n")
 print(agent_data.loc[i, 'Probability'])
-
+print("\n")
+print(agent_data.loc[i, 'Bid Count'])
+print("\n")
 print(f"Winning Bid of Each Step: {model.max_bids}")
 print(f"Final Winning Bids: {model.max_bids[-1]}")
 print(f"Winning Agent of Each Step: {model.winning_agents}")

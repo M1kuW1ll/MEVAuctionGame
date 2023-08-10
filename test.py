@@ -64,7 +64,7 @@ def loss(params) :
 
 
 # Initial guess
-init_params = [-3, 0.1]
+init_params = [-5, 0.1]
 
 # Use the minimize function from scipy.optimize
 result = minimize(loss, init_params, method='L-BFGS-B', bounds=[(-20, 20), (0, 10)])
