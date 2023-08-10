@@ -197,6 +197,12 @@ def get_bid_agents(model):
 def get_public_signal(model):
     return model.public_signal_value
 
+def get_private_signal_max(model):
+    return model.private_signal_max
+
+def get_aggregated_signal_max(model):
+    return model.aggregated_signal_max
+
 
 class Auction(Model):
     def __init__(self, N, A, L, S, B, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, T_mean, T_sd, delay) :
@@ -221,6 +227,8 @@ class Auction(Model):
         self.public_signal = 0
         self.public_signal_value = 0
         self.private_signal = 0
+        self.private_signal_max = 0
+        self.aggregated_signal_max = 0
 
         # Initialize auction time and rate parameters
         self.T = norm.rvs(loc=T_mean, scale=T_sd)
@@ -280,7 +288,9 @@ class Auction(Model):
             model_reporters={
                 "Current Bids" : get_current_bids,
                 "Agents" : get_bid_agents,
-                "Public Signal" : get_public_signal
+                "Public Signal" : get_public_signal,
+                "Private Signal Max": get_private_signal_max,
+                "Aggregated Signal Max": get_aggregated_signal_max
             },
             agent_reporters={"Bid" : "bid",
                              "Probability": "probability"
@@ -304,9 +314,12 @@ class Auction(Model):
 
         for _ in range (new_private_signal):
             private_signal_value = np.random.lognormal(mean = -8.41975, sigma = 1.95231)
+            self.private_signal_max += private_signal_value
             for agent in self.schedule.agents:
                 if random.random() < agent.probability:
                     agent.private_signal_value += private_signal_value
+
+        self.aggregated_signal_max = self.public_signal_value + self.private_signal_max
 
         self.schedule.step()
 
@@ -381,6 +394,8 @@ for i in range(len(model_data)) :
 all_bids = pd.concat(dfs)
 
 public_signals = model_data["Public Signal"]
+private_signal_max = model_data["Private Signal Max"]
+aggregated_signal_max = model_data["Aggregated Signal Max"]
 
 # Plot the data
 plt.figure(figsize=(20, 12))
@@ -389,7 +404,9 @@ plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.
 fontsize = 12
 for column in all_bids.columns:
     plt.plot(all_bids.index, all_bids[column], label=column,linewidth=2)
-plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=2, color='green')
+plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
+plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
+plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
 plt.xlabel('Time Step', fontsize=fontsize)
 plt.ylabel('Bid Value', fontsize=fontsize)
 plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=12)
