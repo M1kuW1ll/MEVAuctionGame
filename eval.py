@@ -23,7 +23,7 @@ def generate_strategies(fixed_strategy=None, manual_values=None):
     return strategies
 
 def run_simulation(strategies, delay, num_simulations):
-    sim_results = pd.DataFrame(columns=['winning_agent', 'winning_bid_value', 'Aggregated Signal Max','Profit','winning_bid_time', 'N', 'A', 'L', 'S', 'B', 'Delay'])  # Add 'Aggregated Signal Max' to columns
+    sim_results = pd.DataFrame(columns=['winning_agent', 'winning_bid_value', 'Winner Aggregated Signal','Profit', 'Probability', 'winning_bid_time', 'N', 'A', 'L', 'S', 'B', 'Delay'])  # Add 'Aggregated Signal Max' to columns
     for _ in range(num_simulations):
         N, A, L, S, B = strategies.values()
         model = Auction(N, A, L, S, B, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
@@ -31,12 +31,12 @@ def run_simulation(strategies, delay, num_simulations):
         for i in range(int(model.T * 100)):
             model.step()
         time_step = int(model.T * 100) - 1
-        sim_results.loc[len(sim_results)] = [int(model.winning_agents[-1:][0]), model.max_bids[-1:][0],model.aggregated_signal_max, 
-                                             model.aggregated_signal_max - model.max_bids[-1:][0],time_step, N, A, L, S, B, delay]  # Add 'model.aggregated_signal_max' to values
+        sim_results.loc[len(sim_results)] = [int(model.winning_agents[-1:][0]), model.max_bids[-1:][0],model.winner_aggregated_signal,
+                                             model.winner_profit, model.winner_probability, time_step, N, A, L, S, B, delay]  # Add 'model.aggregated_signal_max' to values
 
     return sim_results
 
-manual_values = {'N': 10, 'A': 0, 'L': 0, 'S': 0, 'B': 0}
+manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 4, 'B': 0}
 num_simulations = 100
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
 all_sim_results = []

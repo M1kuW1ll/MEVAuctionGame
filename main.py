@@ -24,6 +24,7 @@ class PlayerWithNaiveStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
         self.bid_count = 0
+        self.profit = 0
 
     def step(self):
 
@@ -34,6 +35,7 @@ class PlayerWithNaiveStrategy(Agent):
             self.bid = self.aggregated_signal - self.pm
 
         self.bid_queue.append(self.bid)
+        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -58,13 +60,14 @@ class PlayerWithAdaptiveStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
         self.bid_count = 0
+        self.profit = 0
 
     def step(self):
 
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal_value + self.private_signal_value
         # delta is a small constant value added to the current maximum bid
-        delta = 0.01
+        delta = 0.001
 
         if len(self.model.max_bids) >= self.model.global_delay + 1:
             if self.aggregated_signal - self.pm > self.model.max_bids[-1] + delta:
@@ -74,6 +77,7 @@ class PlayerWithAdaptiveStrategy(Agent):
                 self.bid = self.aggregated_signal - self.pm
 
         self.bid_queue.append(self.bid)
+        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -100,6 +104,7 @@ class PlayerWithLastMinute(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
+        self.profit = 0
 
     def step(self):
         t = self.model.schedule.time
@@ -117,6 +122,7 @@ class PlayerWithLastMinute(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
+        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -143,6 +149,7 @@ class PlayerWithStealthStrategy(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
+        self.profit = 0
 
     def step(self):
         t = self.model.schedule.time  # get current time
@@ -160,6 +167,7 @@ class PlayerWithStealthStrategy(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
+        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -187,6 +195,7 @@ class PlayerWithBluffStrategy(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
+        self.profit = 0
 
     def step(self) :
         t = self.model.schedule.time  # get current time
@@ -204,6 +213,7 @@ class PlayerWithBluffStrategy(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
+        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -263,6 +273,11 @@ class Auction(Model):
         self.aggregated_signal_max = 0
         self.probability_mean = 0
         self.probability_std = 0
+
+        # Initialize winner's info
+        self.winner_profit = 0
+        self.winner_aggregated_signal = 0
+        self.winner_probability = 0
 
 
         # Initialize auction time and rate parameters
@@ -363,8 +378,13 @@ class Auction(Model):
         if self.current_bids:
             max_bid = max(self.current_bids)
             self.max_bids.append(max_bid)
-            winning_agent = self.bid_agents[self.current_bids.index(max_bid)]
-            self.winning_agents.append(winning_agent)
+            winner_id = self.bid_agents[self.current_bids.index(max_bid)]
+            self.winning_agents.append(winner_id)
+            for agent in self.schedule.agents:
+                if agent.unique_id == winner_id:
+                    self.winner_profit = agent.profit
+                    self.winner_aggregated_signal = agent.aggregated_signal
+                    self.winner_probability = agent.probability
 
         self.show_current_bids = self.current_bids.copy()
         self.show_bid_agents = self.bid_agents.copy()
@@ -399,9 +419,8 @@ print("\n")
 print(agent_data.loc[i, 'Bid Count'])
 print("\n")
 print(f"Winning Bid of Each Step: {model.max_bids}")
-print(f"Final Winning Bids: {model.max_bids[-1]}")
 print(f"Winning Agent of Each Step: {model.winning_agents}")
-print(f"Final Winning Agent: {model.winning_agents[-1]}")
+
 
 # Print table for each step
 for time_step in range(int(model.T * 100)):
@@ -418,7 +437,11 @@ for time_step in range(int(model.T * 100)):
 
 print('Winning Agent ID: ' + str(model.winning_agents[-1:][0]))
 print('Winning bid value: ' + str(model.max_bids[-1:][0]))
+print(f"Winner Profit: {model.winner_profit}")
+print(f"Winner Total Signal: {model.winner_aggregated_signal}")
+print(f"Winner Probility: {model.winner_probability}")
 print('Winning bid time: ' + str(time_step) + ' ms')
+
 
 dfs = []
 
