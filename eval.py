@@ -37,7 +37,7 @@ def run_simulation(strategies, delay, num_simulations):
     return sim_results
 
 manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 4, 'B': 0}
-num_simulations = 100
+num_simulations = 3000
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
 all_sim_results = []
 
@@ -48,4 +48,4 @@ for fixed_strategy in [None]:
         sim_results = run_simulation(strategies, delay, num_simulations)
         all_sim_results.append(sim_results)
 concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
-concatenated_sim_results.to_csv('all_simulation_results.csv', index=False)  # Save all simulation results to a CSV file
+concatenated_sim_results.to_csv('all_simulation_results5.csv', index=False)  # Save all simulation results to a CSV file

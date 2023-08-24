@@ -72,8 +72,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         if len(self.model.max_bids) >= self.model.global_delay + 1:
             if self.aggregated_signal - self.pm > self.model.max_bids[-1] + delta:
                 self.bid = self.model.max_bids[-1] + delta
-            elif self.aggregated_signal - self.pm <= self.model.max_bids[
-                -1 - self.model.global_delay] + delta and self.aggregated_signal > self.pm:
+            elif self.aggregated_signal - self.pm <= self.model.max_bids[-1] + delta and self.aggregated_signal > self.pm:
                 self.bid = self.aggregated_signal - self.pm
 
         self.bid_queue.append(self.bid)
