@@ -55,22 +55,25 @@ from scipy.stats import lognorm
 import pandas as pd
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('all_simulation_results4.csv')
+all_simulation_results = pd.read_csv('all_simulation_results_17agents_run5.csv')
 
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)])
 num_stealth_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 12) & (all_simulation_results['winning_agent'] <= 15)])
+num_bluff_winning = len(all_simulation_results[all_simulation_results['winning_agent'] == 16])
 
 naive_winning_counts = []
 adapt_winning_counts = []
 lastminute_winning_counts = []
 stealth_winning_counts = []
+bluff_winning_counts = []
 
 print("Naive Agents Winning:", num_naive_winning, num_naive_winning/1000)
 print("Adaptive Agents Winning:", num_adapt_winning, num_adapt_winning/1000)
 print("Last-minute Agents Winning:", num_lastminute_winning, num_lastminute_winning/1000)
 print("Stealth Agents Winning:", num_stealth_winning, num_stealth_winning/1000)
+print("Bluff Agents Winning:", num_bluff_winning, num_bluff_winning/1000)
 print("\n")
 for delay in range (1, 11):
     num_naive_winning_delay = len(all_simulation_results[
@@ -108,12 +111,18 @@ for delay in range (1, 11):
     stealth_winning_counts.append(num_stealth_winning_delay)
     print("Stealth Agents Winning with delay", delay, ":", num_stealth_winning_delay)
 
+for delay in range (1, 11):
+    num_bluff_winning_delay = len(all_simulation_results[(all_simulation_results['winning_agent'] ==16) &
+                                      (all_simulation_results['Delay'] == delay)])
+    bluff_winning_counts.append(num_bluff_winning_delay)
+    print("Bluff Agents Winning with delay", delay, ":", num_bluff_winning_delay)
 
 plt.figure(figsize=(10, 6))
 plt.plot(range(1, 11), naive_winning_counts, label='Naive Agents', marker='o')
 plt.plot(range(1, 11), adapt_winning_counts, label='Adaptive Agents', marker='o')
 plt.plot(range(1, 11), lastminute_winning_counts, label='Last-minute Agents', marker='o')
 plt.plot(range(1, 11), stealth_winning_counts, label='Stealth Agents', marker='o')
+plt.plot(range(1, 11), bluff_winning_counts, label='Bluff Agents', marker='o')
 plt.xlabel('Delay')
 plt.ylabel('Number of Winning Agents')
 plt.title('Number of Winning Agents by Agent Type and Delay')

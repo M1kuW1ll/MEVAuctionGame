@@ -36,16 +36,22 @@ def run_simulation(strategies, delay, num_simulations):
 
     return sim_results
 
-manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 4, 'B': 0}
+manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 4, 'B': 1}
 num_simulations = 3000
+num_runs = 3
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
-all_sim_results = []
 
-for fixed_strategy in [None]:
-    for delay in range(1, 11):
-        print('Run ' + str(delay))
-        strategies = generate_strategies(fixed_strategy, manual_values)
-        sim_results = run_simulation(strategies, delay, num_simulations)
-        all_sim_results.append(sim_results)
-concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
-concatenated_sim_results.to_csv('all_simulation_results5.csv', index=False)  # Save all simulation results to a CSV file
+for run in range(num_runs):
+    all_sim_results = []
+    for fixed_strategy in [None]:
+        print('Run ' + str(run))
+        for delay in range(1, 11):
+            print('Delay ' + str(delay))
+            strategies = generate_strategies(fixed_strategy, manual_values)
+            sim_results = run_simulation(strategies, delay, num_simulations)
+            all_sim_results.append(sim_results)
+
+    concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
+    filename = f'all_simulation_results_17agents_run{run + 1}.csv'
+    concatenated_sim_results.to_csv(filename, index=False)
+    print(f'Simulation results saved to {filename}')

@@ -69,7 +69,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         # delta is a small constant value added to the current maximum bid
         delta = 0.001
 
-        if len(self.model.max_bids) >= self.model.global_delay + 1:
+        if len(self.model.max_bids) >= 1:
             if self.aggregated_signal - self.pm > self.model.max_bids[-1] + delta:
                 self.bid = self.model.max_bids[-1] + delta
             elif self.aggregated_signal - self.pm <= self.model.max_bids[-1] + delta and self.aggregated_signal > self.pm:
@@ -325,7 +325,7 @@ class Auction(Model):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             time_reveal_delta = random.randint(8, 10)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
-            bluff_value = np.random.uniform(0.17, 0.2)
+            bluff_value = np.random.uniform(0.25, 0.27)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
@@ -397,7 +397,7 @@ class Auction(Model):
 
 # Setup and run the model
 model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=3)
+                T_mean=12, T_sd=0.1, delay=15)
 
 for i in range(int(model.T * 100)):
     model.step()
