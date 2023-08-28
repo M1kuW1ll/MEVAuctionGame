@@ -24,7 +24,6 @@ class PlayerWithNaiveStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
         self.bid_count = 0
-        self.profit = 0
 
     def step(self):
 
@@ -35,7 +34,6 @@ class PlayerWithNaiveStrategy(Agent):
             self.bid = self.aggregated_signal - self.pm
 
         self.bid_queue.append(self.bid)
-        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -60,7 +58,6 @@ class PlayerWithAdaptiveStrategy(Agent):
         self.bid_queue = deque(maxlen=(self.individual_delay + self.model.global_delay))
         self.probability = probability
         self.bid_count = 0
-        self.profit = 0
 
     def step(self):
 
@@ -76,7 +73,6 @@ class PlayerWithAdaptiveStrategy(Agent):
                 self.bid = self.aggregated_signal - self.pm
 
         self.bid_queue.append(self.bid)
-        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -103,7 +99,6 @@ class PlayerWithLastMinute(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
-        self.profit = 0
 
     def step(self):
         t = self.model.schedule.time
@@ -121,7 +116,6 @@ class PlayerWithLastMinute(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
-        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -148,7 +142,6 @@ class PlayerWithStealthStrategy(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
-        self.profit = 0
 
     def step(self):
         t = self.model.schedule.time  # get current time
@@ -166,7 +159,6 @@ class PlayerWithStealthStrategy(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
-        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -194,7 +186,6 @@ class PlayerWithBluffStrategy(Agent):
         self.time_estimate = time_estimate
         self.probability = probability
         self.bid_count = 0
-        self.profit = 0
 
     def step(self) :
         t = self.model.schedule.time  # get current time
@@ -212,7 +203,6 @@ class PlayerWithBluffStrategy(Agent):
             self.bid = 0
 
         self.bid_queue.append(self.bid)
-        self.profit = self.aggregated_signal - self.bid
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -381,7 +371,7 @@ class Auction(Model):
             self.winning_agents.append(winner_id)
             for agent in self.schedule.agents:
                 if agent.unique_id == winner_id:
-                    self.winner_profit = agent.profit
+                    self.winner_profit = agent.aggregated_signal - max_bid
                     self.winner_aggregated_signal = agent.aggregated_signal
                     self.winner_probability = agent.probability
 
