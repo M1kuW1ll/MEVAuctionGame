@@ -34,7 +34,7 @@ class PlayerWithNaiveStrategy(Agent):
         new_private_signal = poisson.rvs(mu=self.private_lambda)
 
         for _ in range(new_private_signal):
-            signal_value = np.random.lognormal(mean = 0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_value += signal_value
             self.private_signal += 1
 
@@ -69,7 +69,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         new_private_signal = poisson.rvs(mu=self.private_lambda)
 
         for _ in range(new_private_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_value += signal_value
             self.private_signal += 1
 
@@ -113,7 +113,7 @@ class PlayerWithLastMinute(Agent):
         new_private_signal = poisson.rvs(mu=self.private_lambda)
 
         for _ in range(new_private_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_value += signal_value
             self.private_signal += 1
         # Aggregated signal
@@ -157,7 +157,7 @@ class PlayerWithStealthStrategy(Agent):
         new_private_signal = poisson.rvs(mu=self.private_lambda)
 
         for _ in range(new_private_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_value += signal_value
             self.private_signal += 1
 
@@ -203,7 +203,7 @@ class PlayerWithBluffStrategy(Agent):
         new_private_signal = poisson.rvs(mu=self.private_lambda)
 
         for _ in range(new_private_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-8.41975, sigma =1.95231)
             self.private_signal_value += signal_value
             self.private_signal += 1
 
@@ -261,21 +261,21 @@ class Auction(Model):
         # Create Agents
         for i in range(self.num_naive):
             pm = np.random.uniform(0.001, 0.002)
-            rate_private = np.random.uniform(0.08, 0.1)
+            rate_private = np.random.uniform(0.04, 0.045)
             delay = random.randint(3, 5)
             a = PlayerWithNaiveStrategy(i, self, pm, rate_private, delay)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
             pm = np.random.uniform(0.001, 0.002)
-            rate_private = np.random.uniform(0.08, 0.1)
+            rate_private = np.random.uniform(0.04, 0.045)
             delay = random.randint(3, 5)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, rate_private, delay)
             self.schedule.add(a)
 
         for i in range(self.num_lastminute):
             pm = np.random.uniform(0.001, 0.002)
-            rate_private = np.random.uniform(0.08, 0.1)
+            rate_private = np.random.uniform(0.04, 0.045)
             time_reveal_delta = random.randint(3, 5)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
@@ -285,7 +285,7 @@ class Auction(Model):
 
         for i in range(self.num_stealth):
             pm = np.random.uniform(0.001, 0.002)
-            rate_private = np.random.uniform(0.08, 0.1)
+            rate_private = np.random.uniform(0.04, 0.045)
             time_reveal_delta = random.randint(3, 5)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
             delay = random.randint(3, 5)
@@ -295,10 +295,10 @@ class Auction(Model):
 
         for i in range(self.num_bluff):
             pm = np.random.uniform(0.001, 0.002)
-            rate_private = np.random.uniform(0.08, 0.1)
+            rate_private = np.random.uniform(0.04, 0.045)
             time_reveal_delta = random.randint(3, 5)
             time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
-            bluff_value = random.randint(400,410)
+            bluff_value = np.random.uniform(0.25,0.27)
             delay = random.randint(3, 5)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
                                         self, pm, rate_private, time_reveal_delta, time_estimate, bluff_value, delay)
@@ -319,7 +319,7 @@ class Auction(Model):
         self.public_signal += new_public_signal
 
         for _ in range(new_public_signal) :
-            signal_value = np.random.lognormal(mean=0.3, sigma=0.5)
+            signal_value = np.random.lognormal(mean=-11.66306, sigma=3.05450)
             # Add the value of the current public signal to the total value
             self.public_signal_value += signal_value
 
@@ -340,7 +340,7 @@ class Auction(Model):
         self.datacollector.collect(self)
 
 # Setup and run the model
-model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.1, rate_public_sd=0, T_mean=12, T_sd=0.1, delay=3)
+model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.085, rate_public_sd=0, T_mean=12, T_sd=0.1, delay=3)
 
 for i in range(int(model.T * 100)):
     model.step()
@@ -385,7 +385,7 @@ for i in range(len(model_data)) :
 all_bids = pd.concat(dfs)
 
 # Plot the data
-plt.figure(figsize=(20, 12), dpi=150)
+plt.figure(figsize=(20, 12))
 plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.columns))))
 
 fontsize = 18
@@ -398,9 +398,9 @@ plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsiz
 plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
 plt.grid(False)
 plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-plt.yticks(np.arange(0, 500, 50), fontsize=fontsize)
+plt.yticks(np.arange(0, 0.3, 0.015), fontsize=fontsize)
 plt.axvline(1200, color='k')
-plt.xlim(0), plt.ylim(-1)
+plt.xlim(0), plt.ylim(0)
 plt.show()
 
 print('Winning Agent ID: ' + str(model.winning_agents[-1:][0]))
