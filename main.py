@@ -464,7 +464,7 @@ plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsiz
 plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
 plt.grid(False)
 plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-plt.yticks(np.arange(0, 0.2, 0.01), fontsize=fontsize)
+plt.yticks(np.arange(0, 0.27, 0.01), fontsize=fontsize)
 plt.axvline(1200, color='k')
 plt.xlim(0), plt.ylim(0)
 plt.show()

@@ -55,7 +55,7 @@ from scipy.stats import lognorm
 import pandas as pd
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('all_simulation_results_16agents2_run1.csv')
+all_simulation_results = pd.read_csv('all_simulation_results_16agents2_run3.csv')
 
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
