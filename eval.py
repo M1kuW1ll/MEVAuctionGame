@@ -36,9 +36,9 @@ def run_simulation(strategies, delay, num_simulations):
 
     return sim_results
 
-manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 4, 'B': 4}
+manual_values = {'N': 8, 'A': 8, 'L': 0, 'S': 0, 'B': 0}
 num_simulations = 3000
-num_runs = 1
+num_runs = 3
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
 
 for run in range(num_runs):
@@ -52,6 +52,6 @@ for run in range(num_runs):
             all_sim_results.append(sim_results)
 
     concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
-    filename = f'all_simulation_results_20agents_run3.csv'
+    filename = f'8naive8adapt_run{run+1}.csv'
     concatenated_sim_results.to_csv(filename, index=False)
     print(f'Simulation results saved to {filename}')

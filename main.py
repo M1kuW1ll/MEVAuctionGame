@@ -64,7 +64,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal_value + self.private_signal_value
         # delta is a small constant value added to the current maximum bid
-        delta = 0.001
+        delta = 0.0001
 
         if len(self.model.max_bids) >= 1:
             if self.aggregated_signal - self.pm > self.model.max_bids[-1] + delta:
