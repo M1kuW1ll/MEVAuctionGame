@@ -64,7 +64,7 @@ class PlayerWithAdaptiveStrategy(Agent):
         # Aggregated signal
         self.aggregated_signal = self.model.public_signal_value + self.private_signal_value
         # delta is a small constant value added to the current maximum bid
-        delta = 0.0001
+        delta = 0.0002
 
         if len(self.model.max_bids) >= 1:
             if self.aggregated_signal - self.pm > self.model.max_bids[-1] + delta:
@@ -294,7 +294,7 @@ class Auction(Model):
         for i in range(self.num_lastminute):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             time_reveal_delta = random.randint(8, 10)
-            time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
+            time_estimate = 1200
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
@@ -304,7 +304,7 @@ class Auction(Model):
         for i in range(self.num_stealth):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             time_reveal_delta = random.randint(8, 10)
-            time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
+            time_estimate = 1200
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
@@ -314,7 +314,7 @@ class Auction(Model):
         for i in range(self.num_bluff):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             time_reveal_delta = random.randint(8, 10)
-            time_estimate = int(norm.rvs(loc=T_mean, scale=T_sd) * 100)
+            time_estimate = 1200
             bluff_value = np.random.uniform(0.25, 0.27)
             delay = random.randint(3, 5)
             probability = np.random.uniform(0.8, 1.0)
@@ -386,8 +386,8 @@ class Auction(Model):
 
 
 # Setup and run the model
-model = Auction(5, 5, 3, 3, 2, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=15)
+model = Auction(4, 4, 4, 4, 0, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
+                T_mean=12, T_sd=0.1, delay=8)
 
 for i in range(int(model.T * 100)):
     model.step()

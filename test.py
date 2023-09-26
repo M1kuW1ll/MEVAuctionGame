@@ -1,33 +1,11 @@
-# import matplotlib.pyplot as plt
-# from scipy.stats import poisson, lognorm
-import random
+import numpy as np
+from scipy.optimize import minimize
+from scipy.stats import lognorm
 
-# def E(sigma, mean):
-#     return poisson.rvs(sigma, mean)
-#
-# sigma = 0.5
-# mean = 0.1
-#
-
-# random_variates = [E(sigma, mean) for t in times]
-# cumulative_variates = np.cumsum(random_variates)
-# plt.figure(figsize=(10, 6))
-# plt.plot(times, cumulative_variates)
-# plt.plot(times, random_variates)
-# plt.xlabel('Time')
-# plt.ylabel('E(t)')
-# plt.title('Private Lognorm Process')
-# plt.grid(True)
-# plt.show()
-
-# import numpy as np
-# from scipy.optimize import minimize
-# from scipy.stats import lognorm
-#
 # target_mean = 0.00027
 # target_std = 0.097
-#
-#
+
+
 # def loss(params) :
 #     # Unpack parameters
 #     mu, sigma = params
@@ -56,47 +34,46 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('8naive8stealth_run3.csv')
+all_simulation_results = pd.read_csv('NaivePairwise/8naive8adapt(delta0.001)3.csv')
 
-num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 7)])
-num_other_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 15)])
+num_first_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 7)])
+num_second_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 15)])
 # num_bluff_winning_true = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['Profit'] > 0)])
 # num_bluff_winning_bluff = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['Profit'] < 0) &
 #                                                      (all_simulation_results['winning_bid_value'] > 0.25)])
 
-other_winning_counts = []
-bluff_winning_counts = []
+first_winning_counts = []
+second_winning_counts = []
 
-print("Naive Agents Winning:", num_naive_winning)
+print("First Agents Winning:", num_first_winning)
 # print("Bluff Agents Winning with true bid value:", num_bluff_winning_true, num_bluff_winning_true/(30000-num_bluff_winning_bluff))
 # print("Bluff Agents Winning with bluff bid value", num_bluff_winning_bluff)
-print("Other Agents Winning:", num_other_winning)
+print("Second Agents Winning:", num_second_winning)
 
 for delay in range (1, 11):
-    num_stealth_winning_delay = len(all_simulation_results[
+    num_first_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 0) &
                                       (all_simulation_results['winning_agent'] <= 7) &
                                       (all_simulation_results['Delay'] == delay)
                                       ])
-    other_winning_counts.append(num_stealth_winning_delay)
-    print("Stealth Agents Winning with delay", delay, ":", num_stealth_winning_delay)
+    first_winning_counts.append(num_first_winning_delay)
+    print("First Agents Winning with delay", delay, ":", num_first_winning_delay)
 
 print("\n")
 
 for delay in range (1, 11):
-    num_bluff_winning_delay = len(all_simulation_results[
+    num_second_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 8) &
-                                      (all_simulation_results['Delay'] == delay) &
-                                      (all_simulation_results['Profit'] > 0)])
-    bluff_winning_counts.append(num_bluff_winning_delay)
-    print("Bluff Agents Winning with delay", delay, ":", num_bluff_winning_delay)
+                                      (all_simulation_results['Delay'] == delay)])
+    second_winning_counts.append(num_second_winning_delay)
+    print("Second Agents Winning with delay", delay, ":", num_second_winning_delay)
 
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, 11), other_winning_counts, label='Naive Agents', marker='o')
-plt.plot(range(1, 11), bluff_winning_counts, label='Stealth Agents', marker='o')
+plt.plot(range(1, 11), first_winning_counts, label='Naive Agents', marker='o')
+plt.plot(range(1, 11), second_winning_counts, label='Adaptive Agents', marker='o')
 plt.xlabel('Delay')
 plt.ylabel('Number of Winning Agents')
-plt.title('8 Naive VS 8 Stealth')
+plt.title('8 Naive VS 8 Adaptive (delta 0.001)')
 plt.legend(loc='center right', bbox_to_anchor=(1, 0.5))
 plt.xticks(range(1, 11))
 plt.grid(True)
