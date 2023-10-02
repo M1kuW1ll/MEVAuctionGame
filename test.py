@@ -29,12 +29,32 @@ from scipy.stats import lognorm
 #
 # print(f"Best µ: {mu_best:.5f}, Best σ: {sigma_best:.5f}")
 
+# import math
+#
+#
+# def compute_log_params(mu_X, sigma_X2) :
+#     # Calculate mean of the natural logarithm of X
+#     mu = math.log(mu_X ** 2 / math.sqrt(mu_X ** 2 + sigma_X2))
+#
+#     # Calculate variance of the natural logarithm of X
+#     sigma2 = math.log(1 + sigma_X2 / mu_X ** 2)
+#     sigma = math.sqrt(sigma2)
+#     return mu, sigma
+#
+#
+# # Example usage:
+# mu_X = 0.00027  # mean of X
+# sigma_X2 = 0.0977  # variance of X, which is square of standard deviation
+#
+# mu, sigma = compute_log_params(mu_X, sigma_X2)
+# print(f"Mean of ln(X): {mu}")
+# print(f"Variance of ln(X): {sigma}")
 
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('NaivePairwise/8naive8adapt(delta0.001)3.csv')
+all_simulation_results = pd.read_csv('')
 
 num_first_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 7)])
 num_second_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 15)])
@@ -69,12 +89,48 @@ for delay in range (1, 11):
     print("Second Agents Winning with delay", delay, ":", num_second_winning_delay)
 
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, 11), first_winning_counts, label='Naive Agents', marker='o')
-plt.plot(range(1, 11), second_winning_counts, label='Adaptive Agents', marker='o')
+plt.plot(range(1, 11), first_winning_counts, label='Adaptive Agents)', marker='o')
+plt.plot(range(1, 11), second_winning_counts, label='Last-minute Agents', marker='o')
 plt.xlabel('Delay')
 plt.ylabel('Number of Winning Agents')
-plt.title('8 Naive VS 8 Adaptive (delta 0.001)')
+plt.title('8 Adaptive VS 8 Last-Minute (NEW)')
 plt.legend(loc='center right', bbox_to_anchor=(1, 0.5))
 plt.xticks(range(1, 11))
+plt.grid(True)
+plt.show()
+
+avg_profit_first = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 7)]['Profit'].mean()
+avg_profit_second = all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 15)]['Profit'].mean()
+
+print("Average Profit for First Agents:", avg_profit_first)
+print("Average Profit for Second Agents:", avg_profit_second)
+first_profit_means = []
+second_profit_means = []
+
+# Calculate average profit for each delay
+for delay in range(1, 11):  # Assuming delays from 1 to 4 as in your provided code
+    naive_profit = all_simulation_results[
+        (all_simulation_results['winning_agent'] >= 0) &
+        (all_simulation_results['winning_agent'] <= 7) &
+        (all_simulation_results['Delay'] == delay)
+    ]['Profit'].mean()
+    first_profit_means.append(naive_profit)
+
+    adapt_profit = all_simulation_results[
+        (all_simulation_results['winning_agent'] >= 8) &
+        (all_simulation_results['winning_agent'] <= 15) &
+        (all_simulation_results['Delay'] == delay)
+    ]['Profit'].mean()
+    second_profit_means.append(adapt_profit)
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, 11), first_profit_means, label='First Agents Profit', marker='o')
+plt.plot(range(1, 11), second_profit_means, label='Second Agents Profit', marker='o')
+plt.xlabel('Delay')
+plt.ylabel('Average Profit')
+plt.title('8 Adaptive VS 8 Last-minute (delta 0.0001)')
+plt.legend(loc='center right', bbox_to_anchor=(0.35, 0.85))
+plt.xticks(range(1, 11))
+
 plt.grid(True)
 plt.show()
