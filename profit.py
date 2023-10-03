@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('16Agents_delay13.csv')
+all_simulation_results = pd.read_csv('Round3/16uniform_round3_run1.csv')
 
 avg_profit_naive = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)]['Profit'].mean()
 avg_profit_adapt = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]['Profit'].mean()
@@ -73,6 +73,35 @@ plt.ylabel('Average Profit')
 plt.title('16 Agents Uniform Simulation')
 plt.legend(loc='center right', bbox_to_anchor=(0.35, 0.85))
 plt.xticks(range(1, 11))
-plt.yticks(np.arange(0.0065, 0.0095, 0.0005))
+
 plt.grid(True)
+plt.show()
+
+naive_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)]['Profit']
+adapt_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]['Profit']
+lastminute_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)]['Profit']
+stealth_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 12) & (all_simulation_results['winning_agent'] <= 15)]['Profit']
+
+data = [naive_profits, adapt_profits, lastminute_profits, stealth_profits]
+colors = ['green', 'blue', 'yellow', 'purple']
+
+plt.figure(figsize=(10, 6))
+boxplot = plt.boxplot(data, vert=True, patch_artist=True, whis=100)
+
+for patch, color in zip(boxplot['boxes'], colors):
+    patch.set_facecolor(color)
+
+for median in boxplot['medians']:
+    median.set(color='black', linewidth=2)
+
+plt.title('Profit Distribution by Strategy')
+plt.xlabel('Strategy')
+plt.ylabel('Profit')
+plt.xticks([1, 2, 3, 4], ['Naive', 'Adaptive', 'Last-minute', 'Stealth'])
+plt.ylim(0.006, 0.0075)  # Setting y-axis limit as you specified
+
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.tight_layout()
+
+# Display the plot
 plt.show()

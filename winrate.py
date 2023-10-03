@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('16uniform/16uniform(delta0.0002)3.csv')
+all_simulation_results = pd.read_csv('Round3/16uniform_round3_run2.csv')
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)])
@@ -99,5 +99,4 @@ plt.xticks(range(1,11))
 plt.grid(True)
 plt.show()
 
-x = (0.009147894732505947*6184-10.414693663784)/6183
-print(x)
+
