@@ -98,7 +98,7 @@ plt.title('Profit Distribution by Strategy')
 plt.xlabel('Strategy')
 plt.ylabel('Profit')
 plt.xticks([1, 2, 3, 4], ['Naive', 'Adaptive', 'Last-minute', 'Stealth'])
-plt.ylim(0.006, 0.0075)  # Setting y-axis limit as you specified
+plt.ylim(0.006, 0.0075)
 
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()

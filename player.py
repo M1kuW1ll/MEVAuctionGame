@@ -21,47 +21,59 @@ num_player13_winning = len(all_simulation_results[(all_simulation_results['winni
 num_player14_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] == 14)])
 num_player15_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] == 15)])
 
-player0_winning_counts = []
-player1_winning_counts = []
-player2_winning_counts = []
-player3_winning_counts = []
-player4_winning_counts = []
-player5_winning_counts = []
-player6_winning_counts = []
-player7_winning_counts = []
-player8_winning_counts = []
-player9_winning_counts = []
-player10_winning_counts = []
-player11_winning_counts = []
-player12_winning_counts = []
-player13_winning_counts = []
-player14_winning_counts = []
-player15_winning_counts = []
+# Number of players
+num_players = 16
 
-for delay in range (1, 11):
-    num_player0_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] == 0) &
-                                      (all_simulation_results['Delay'] == delay)
-                                      ])
-    player0_winning_counts.append(num_player0_winning_delay)
-    print("Naive Agents Winning with delay", delay, ":", num_player0_winning_delay)
+player_winning_counts = [[] for _ in range(num_players)]
 
-print("\n")
+for player in range(num_players) :
 
-for delay in range (1, 11):
-    num_player1_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] == 1) &
-                                      (all_simulation_results['Delay'] == delay)
-                                      ])
-    player1_winning_counts.append(num_player1_winning_delay)
-    print("Naive Agents Winning with delay", delay, ":", num_player1_winning_delay)
+    for delay in range(1, 11) :
+        num_player_winning_delay = len(all_simulation_results[
+                                           (all_simulation_results['winning_agent'] == player) &
+                                           (all_simulation_results['Delay'] == delay)
+                                           ])
+        player_winning_counts[player].append(num_player_winning_delay)
 
-print("\n")
+        print(f"Player {player} Winning with delay {delay} :", num_player_winning_delay)
+    print("\n")
 
-for delay in range (1, 11):
-    num_player2_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] == 2) &
-                                      (all_simulation_results['Delay'] == delay)
-                                      ])
-    player2_winning_counts.append(num_player2_winning_delay)
-    print("Naive Agents Winning with delay", delay, ":", num_player2_winning_delay)
+plt.figure(figsize=(12, 7))
+
+for player in range(num_players):
+    plt.plot(range(1, 11), player_winning_counts[player], label=f'Player {player}')
+
+plt.title('Winning counts of 16 players across delays')
+plt.xlabel('Delay')
+plt.ylabel('Number of Wins')
+plt.legend(loc='upper right', fontsize='small')
+plt.grid(True, which='both', linestyle='--', linewidth=0.7)
+plt.xticks(range(1, 11))
+plt.tight_layout()
+plt.show()
+
+
+player_profits = []
+
+for player in range(num_players):
+    profits = all_simulation_results[all_simulation_results['winning_agent'] == player]['Profit']
+    player_profits.append(profits)
+
+plt.figure(figsize=(15, 8))  # Adjust the figure size as per your requirements
+boxplot = plt.boxplot(player_profits, vert=True, patch_artist=True, whis=100)
+colors = plt.cm.plasma(np.linspace(0, 1, num_players))
+for patch, color in zip(boxplot['boxes'], colors):
+    patch.set_facecolor(color)
+for median in boxplot['medians']:
+    median.set(color='black', linewidth=2)
+plt.title('Profit Distribution by Player')
+plt.xlabel('Player')
+plt.ylabel('Profit')
+player_labels = [f'Player {i}' for i in range(num_players)]
+plt.xticks(range(1, num_players + 1), player_labels)
+plt.ylim(0.0063, 0.007)
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.tight_layout()
+
+# Display the plot
+plt.show()
