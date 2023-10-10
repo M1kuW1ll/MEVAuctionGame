@@ -276,11 +276,13 @@ class Auction(Model):
 
         self.private_lambda = norm.rvs(loc=rate_private_mean, scale=rate_private_sd)
 
+        probabilities = [i * 0.01 + 0.8 for i in range(15)]
+
         # Create Agents
         for i in range(self.num_naive):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            delay = random.randint(3, 5)
-            probability = np.random.uniform(0.8, 1.0)
+            delay = 1
+            probability = probabilities[i]
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             self.schedule.add(a)
 
@@ -386,8 +388,8 @@ class Auction(Model):
 
 
 # Setup and run the model
-model = Auction(4, 4, 4, 4, 0, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=8)
+model = Auction(15, 0, 0, 0, 0, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
+                T_mean=12, T_sd=0.1, delay=1)
 
 for i in range(int(model.T * 100)):
     model.step()

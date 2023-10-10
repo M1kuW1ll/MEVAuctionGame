@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('Round3/16uniform_round3_run2.csv')
+all_simulation_results = pd.read_csv('Round3/16uniform_round3_run1.csv')
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)])
@@ -93,7 +93,7 @@ plt.plot(range(1, 11), stealth_winning_counts, label='Stealth Agents', marker='o
 # plt.plot(range(1, 11), bluff_winning_counts, label='Bluff Agents', marker='o')
 plt.xlabel('Delay')
 plt.ylabel('Winning Count')
-plt.title('16 Uniform Agent 1 delay for Adaptive')
+plt.title('Winning Count by Strategy at Different Global Delays')
 plt.legend(loc='center right', bbox_to_anchor=(0.95, 0.55))
 plt.xticks(range(1,11))
 plt.grid(True)
