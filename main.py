@@ -9,7 +9,6 @@ import matplotlib.cm as cm
 import random
 from mesa import Agent, Model
 from mesa.time import RandomActivation, SimultaneousActivation
-import seaborn as sns
 
 
 class PlayerWithNaiveStrategy(Agent):
@@ -33,7 +32,7 @@ class PlayerWithNaiveStrategy(Agent):
         if self.aggregated_signal > self.pm :
             self.bid = self.aggregated_signal - self.pm
 
-        self.bid_queue.append(self.bid)
+        self.bid_queue.append((self.bid, self.aggregated_signal))
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -72,7 +71,7 @@ class PlayerWithAdaptiveStrategy(Agent):
             elif self.aggregated_signal - self.pm <= self.model.max_bids[-1] + delta and self.aggregated_signal > self.pm:
                 self.bid = self.aggregated_signal - self.pm
 
-        self.bid_queue.append(self.bid)
+        self.bid_queue.append((self.bid, self.aggregated_signal))
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -115,7 +114,7 @@ class PlayerWithLastMinute(Agent):
         else :
             self.bid = 0
 
-        self.bid_queue.append(self.bid)
+        self.bid_queue.append((self.bid, self.aggregated_signal))
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -158,7 +157,7 @@ class PlayerWithStealthStrategy(Agent):
         else:
             self.bid = 0
 
-        self.bid_queue.append(self.bid)
+        self.bid_queue.append((self.bid, self.aggregated_signal))
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay:
@@ -202,7 +201,7 @@ class PlayerWithBluffStrategy(Agent):
         else :
             self.bid = 0
 
-        self.bid_queue.append(self.bid)
+        self.bid_queue.append((self.bid, self.aggregated_signal))
 
     def advance(self):
         if len(self.bid_queue) == self.individual_delay + self.model.global_delay :
@@ -267,6 +266,7 @@ class Auction(Model):
         self.winner_profit = 0
         self.winner_aggregated_signal = 0
         self.winner_probability = 0
+        self.auction_efficiency = 0
 
 
         # Initialize auction time and rate parameters
@@ -282,22 +282,22 @@ class Auction(Model):
         for i in range(self.num_naive):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = 1
-            probability = probabilities[i]
+            probability = 1
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            delay = random.randint(3, 5)
+            delay = i+1
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_lastminute):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            time_reveal_delta = random.randint(8, 10)
+            time_reveal_delta = random.randint(20, 30)
             time_estimate = 1200
-            delay = random.randint(3, 5)
+            delay = i+1
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
                                      time_reveal_delta, time_estimate, delay, probability)
@@ -305,9 +305,9 @@ class Auction(Model):
 
         for i in range(self.num_stealth):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            time_reveal_delta = random.randint(8, 10)
+            time_reveal_delta = random.randint(20, 30)
             time_estimate = 1200
-            delay = random.randint(3, 5)
+            delay = i+1
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                          time_reveal_delta, time_estimate, delay, probability)
@@ -367,15 +367,16 @@ class Auction(Model):
 
         # Select the winner of the step
         if self.current_bids:
-            max_bid = max(self.current_bids)
+            max_bid, aggregated_signal_at_time_of_bid = max(self.current_bids, key=lambda x: x[0])
             self.max_bids.append(max_bid)
-            winner_id = self.bid_agents[self.current_bids.index(max_bid)]
+            winner_id = self.bid_agents[self.current_bids.index((max_bid, aggregated_signal_at_time_of_bid))]
             self.winning_agents.append(winner_id)
             for agent in self.schedule.agents:
                 if agent.unique_id == winner_id:
-                    self.winner_profit = agent.aggregated_signal - max_bid
-                    self.winner_aggregated_signal = agent.aggregated_signal
+                    self.winner_profit = aggregated_signal_at_time_of_bid - max_bid
+                    self.winner_aggregated_signal = aggregated_signal_at_time_of_bid
                     self.winner_probability = agent.probability
+                    self.auction_efficiency = max_bid/self.aggregated_signal_max
 
         self.show_current_bids = self.current_bids.copy()
         self.show_bid_agents = self.bid_agents.copy()
@@ -389,7 +390,7 @@ class Auction(Model):
 
 # Setup and run the model
 model = Auction(15, 0, 0, 0, 0, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=1)
+                T_mean=12, T_sd=0.1, delay=10)
 
 for i in range(int(model.T * 100)):
     model.step()
@@ -417,14 +418,19 @@ print(f"Winning Agent of Each Step: {model.winning_agents}")
 for time_step in range(int(model.T * 100)):
     current_bids_at_time_step = model_data.loc[time_step, 'Current Bids']
     bid_agents_at_time_step = model_data.loc[time_step, 'Agents']
+    if current_bids_at_time_step :
+        bids, aggregated_signals = zip(*current_bids_at_time_step)
 
-    df = pd.DataFrame({
-        'Bids' : current_bids_at_time_step,
-        'Agents' : bid_agents_at_time_step
-    })
-    print(f"Data for time step {time_step}:")
-    print(df)
-    print("\n")
+        df = pd.DataFrame({
+            'Bids' : bids,
+            'Aggregated Signals' : aggregated_signals,
+            'Agents' : bid_agents_at_time_step
+        })
+        print(f"Data for time step {time_step}:")
+        print(df)
+        print("\n")
+    else :
+        print(f"Data for time step {time_step}: Empty Dataframe. No bids recorded on the relay.\n")
 
 print('Winning Agent ID: ' + str(model.winning_agents[-1:][0]))
 print('Winning bid value: ' + str(model.max_bids[-1:][0]))
@@ -432,14 +438,21 @@ print(f"Winner Profit: {model.winner_profit}")
 print(f"Winner Total Signal: {model.winner_aggregated_signal}")
 print(f"Winner Probility: {model.winner_probability}")
 print('Winning bid time: ' + str(time_step) + ' ms')
-
+print(f"Auction Efficiency: {model.auction_efficiency}")
+print(model.aggregated_signal_max-model.winner_aggregated_signal)
 
 dfs = []
 
 for i in range(len(model_data)) :
     current_bids = model_data["Current Bids"].iloc[i]
     current_agents = model_data["Agents"].iloc[i]
-    bid_dict = {str(agent) : bid for agent, bid in zip(current_agents, current_bids)}
+
+    bids, aggregated_signals = zip(*current_bids) if current_bids else ([], [])
+
+    bid_dict = {}
+    for agent, bid, signal in zip(current_agents, bids, aggregated_signals) :
+        bid_dict[f"Agent_{agent}_Bid"] = bid
+        bid_dict[f"Agent_{agent}_Signal"] = signal
 
     # Convert the dictionary to a DataFrame and store it in the list
     dfs.append(pd.DataFrame(bid_dict, index=[i]))
@@ -450,7 +463,7 @@ public_signals = model_data["Public Signal"]
 private_signal_max = model_data["Private Signal Max"]
 aggregated_signal_max = model_data["Aggregated Signal Max"]
 
-# Plot the data
+
 plt.figure(figsize=(20, 12))
 plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.columns))))
 

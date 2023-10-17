@@ -23,7 +23,7 @@ def generate_strategies(fixed_strategy=None, manual_values=None):
     return strategies
 
 def run_simulation(strategies, delay, num_simulations):
-    sim_results = pd.DataFrame(columns=['winning_agent', 'winning_bid_value', 'Winner Aggregated Signal','Profit', 'Probability', 'winning_bid_time', 'N', 'A', 'L', 'S', 'B', 'Delay'])  # Add 'Aggregated Signal Max' to columns
+    sim_results = pd.DataFrame(columns=['winning_agent', 'winning_bid_value', 'winner_aggregated_signal', 'signal_max','Profit', 'Probability','efficiency', 'auction_time', 'N', 'A', 'L', 'S', 'B', 'Delay'])  # Add 'Aggregated Signal Max' to columns
     for _ in range(num_simulations):
         N, A, L, S, B = strategies.values()
         model = Auction(N, A, L, S, B, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
@@ -31,13 +31,13 @@ def run_simulation(strategies, delay, num_simulations):
         for i in range(int(model.T * 100)):
             model.step()
         time_step = int(model.T * 100) - 1
-        sim_results.loc[len(sim_results)] = [int(model.winning_agents[-1:][0]), model.max_bids[-1:][0],model.winner_aggregated_signal,
-                                             model.winner_profit, model.winner_probability, time_step, N, A, L, S, B, delay]  # Add 'model.aggregated_signal_max' to values
+        sim_results.loc[len(sim_results)] = [int(model.winning_agents[-1:][0]), model.max_bids[-1:][0],model.winner_aggregated_signal, model.aggregated_signal_max,
+                                             model.winner_profit, model.winner_probability, model.auction_efficiency,time_step, N, A, L, S, B, delay]  # Add 'model.aggregated_signal_max' to values
 
     return sim_results
 
-manual_values = {'N': 15, 'A': 0, 'L': 0, 'S': 0, 'B': 0}
-num_simulations = 10000
+manual_values = {'N': 10, 'A': 0, 'L': 0, 'S': 0, 'B': 0}
+num_simulations = 5000
 num_runs = 1
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
 
@@ -45,13 +45,13 @@ for run in range(num_runs):
     all_sim_results = []
     for fixed_strategy in [None]:
         print('Run ' + str(run))
-        delay = 1
-        print('Delay ' + str(delay))
-        strategies = generate_strategies(fixed_strategy, manual_values)
-        sim_results = run_simulation(strategies, delay, num_simulations)
-        all_sim_results.append(sim_results)
+        for delay in range (1,11):
+            print('Delay ' + str(delay))
+            strategies = generate_strategies(fixed_strategy, manual_values)
+            sim_results = run_simulation(strategies, delay, num_simulations)
+            all_sim_results.append(sim_results)
 
     concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
-    filename = f'EOF.csv'
+    filename = f'test_hpc_indidelay.csv'
     concatenated_sim_results.to_csv(filename, index=False)
     print(f'Simulation results saved to {filename}')

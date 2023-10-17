@@ -135,7 +135,3 @@ from scipy.stats import lognorm
 # plt.grid(True)
 # plt.show()
 
-probability_ranges = [(i * 0.1, (i + 1) * 0.1) for i in range(10)]
-for i in range(10) :
-    probability = np.random.uniform(probability_ranges[i][0], probability_ranges[i][1])
-    print(probability)

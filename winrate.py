@@ -29,8 +29,8 @@ print("\n")
 
 for delay in range (1, 11):
     num_naive_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] >= 0) &
-                                      (all_simulation_results['winning_agent'] <= 3) &
+                                      (all_simulation_results['winning_agent'] >= 12) &
+                                      (all_simulation_results['winning_agent'] <= 12) &
                                       (all_simulation_results['Delay'] == delay)
                                       ])
     naive_winning_counts.append(num_naive_winning_delay)
@@ -40,8 +40,8 @@ print("\n")
 
 for delay in range (1, 11):
     num_adapt_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] >= 4) &
-                                      (all_simulation_results['winning_agent'] <= 7) &
+                                      (all_simulation_results['winning_agent'] >= 13) &
+                                      (all_simulation_results['winning_agent'] <= 13) &
                                       (all_simulation_results['Delay'] == delay)
                                       ])
     adapt_winning_counts.append(num_adapt_winning_delay)
@@ -51,8 +51,8 @@ print("\n")
 
 for delay in range (1, 11):
     num_lastminute_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] >= 8) &
-                                      (all_simulation_results['winning_agent'] <= 11) &
+                                      (all_simulation_results['winning_agent'] >= 14) &
+                                      (all_simulation_results['winning_agent'] <= 14) &
                                       (all_simulation_results['Delay'] == delay)
                                       ])
     lastminute_winning_counts.append(num_lastminute_winning_delay)
@@ -62,7 +62,7 @@ print("\n")
 
 for delay in range (1, 11):
     num_stealth_winning_delay = len(all_simulation_results[
-                                      (all_simulation_results['winning_agent'] >= 12) &
+                                      (all_simulation_results['winning_agent'] >= 15) &
                                       (all_simulation_results['winning_agent'] <= 15) &
                                       (all_simulation_results['Delay'] == delay)
                                       ])
@@ -86,15 +86,15 @@ for delay in range (1, 11):
     print("Bluff Agents Winning with bluff bid delay", delay, ":", num_bluff_fake_delay)
 
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, 11), naive_winning_counts, label='Naive Agents', marker='o')
-plt.plot(range(1, 11), adapt_winning_counts, label='Adaptive Agents', marker='o')
-plt.plot(range(1, 11), lastminute_winning_counts, label='Last-minute Agents', marker='o')
-plt.plot(range(1, 11), stealth_winning_counts, label='Stealth Agents', marker='o')
+plt.plot(range(1, 11), naive_winning_counts, label='Stealth Agent (1 individual delay)', marker='o')
+plt.plot(range(1, 11), adapt_winning_counts, label='Stealth Agent (2 individual delay)', marker='o')
+plt.plot(range(1, 11), lastminute_winning_counts, label='Stealth Agent (3 individual delay)', marker='o')
+plt.plot(range(1, 11), stealth_winning_counts, label='Stealth Agent (4 individual delay)', marker='o')
 # plt.plot(range(1, 11), bluff_winning_counts, label='Bluff Agents', marker='o')
-plt.xlabel('Delay')
+plt.xlabel('Global Delay (Step)')
 plt.ylabel('Winning Count')
-plt.title('Winning Count by Strategy at Different Global Delays')
-plt.legend(loc='center right', bbox_to_anchor=(0.95, 0.55))
+plt.title('Winning Count by Stealth Agents with Different Individual delays')
+plt.legend(loc='center right', bbox_to_anchor=(1.01, 0.08))
 plt.xticks(range(1,11))
 plt.grid(True)
 plt.show()

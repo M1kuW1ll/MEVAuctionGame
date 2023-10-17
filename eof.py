@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-all_simulation_results = pd.read_csv('EOF.csv')
+all_simulation_results = pd.read_csv('eof_winrate.csv')
 
-probabilities = np.arange(0.8, 0.95, 0.01)
+probabilities = np.arange(0.8, 1.0, 0.02)
 winning_by_probability = []
 
 for probability in probabilities:
@@ -16,12 +16,12 @@ for probability in probabilities:
     winning_by_probability.append(winning)
 
 plt.figure(figsize=(10, 6))
-plt.plot(probabilities, winning_by_probability, label='Winning Count', marker='o')
-plt.xlabel('Probability')
+plt.scatter(probabilities, winning_by_probability, label='Winning Count', marker='o')
+plt.xlabel('Probability of EOF')
 plt.ylabel('Winning Count')
 plt.title('Winning Count at Different Probabilities')
 plt.xticks(probabilities, [f"{prob:.2f}" for prob in probabilities])
-plt.grid(True)
+
 plt.show()
 
 
@@ -30,7 +30,7 @@ profit_by_probability = [grouped.get_group(prob)['Profit'].values for prob in gr
 
 plt.figure(figsize=(10, 6))
 # Setting the desired x-axis tick labels
-xticks_labels = np.arange(0.8, 0.95, 0.01)
+xticks_labels = np.arange(0.8, 1, 0.02)
 
 # Plotting the box plot
 boxplot = plt.boxplot(profit_by_probability, vert=True, patch_artist=True, whis=100)
@@ -44,8 +44,8 @@ plt.xticks(range(1, len(xticks_labels) + 1), [f"{tick:.2f}" for tick in xticks_l
 plt.ylim(0.0063, 0.007)
 # Labeling and title
 plt.title('Box Plot of Profit Distributions by Probability')
-plt.xlabel('Probability')
-plt.ylabel('Profit')
+plt.xlabel('Probability of EOF')
+plt.ylabel('Profit (ETH)')
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
@@ -71,8 +71,8 @@ bars = plt.bar(xticks_positions, profits_by_probability, color='purple')
 
 plt.xticks(xticks_positions, [f"{prob:.2f}" for prob in probabilities])
 plt.title('Aggregated Profit by Probabilities')
-plt.xlabel('Probability')
-plt.ylabel('Aggregated Profit')
+plt.xlabel('Probability of EOF')
+plt.ylabel('Aggregated Profit (ETH)')
 
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
