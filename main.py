@@ -371,12 +371,20 @@ class Auction(Model):
             self.max_bids.append(max_bid)
             winner_id = self.bid_agents[self.current_bids.index((max_bid, aggregated_signal_at_time_of_bid))]
             self.winning_agents.append(winner_id)
+
+            if self.aggregated_signal_max == 0:
+                self.auction_efficiency = 0
+            else:
+                self.auction_efficiency = max_bid/self.aggregated_signal_max
+
             for agent in self.schedule.agents:
                 if agent.unique_id == winner_id:
                     self.winner_profit = aggregated_signal_at_time_of_bid - max_bid
                     self.winner_aggregated_signal = aggregated_signal_at_time_of_bid
                     self.winner_probability = agent.probability
-                    self.auction_efficiency = max_bid/self.aggregated_signal_max
+
+
+
 
         self.show_current_bids = self.current_bids.copy()
         self.show_bid_agents = self.bid_agents.copy()
