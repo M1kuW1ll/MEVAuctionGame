@@ -2,12 +2,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('Round3/16uniform_round3_run1.csv')
+all_simulation_results = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')
 
-naive_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 12) & (all_simulation_results['winning_agent'] <= 12) & (all_simulation_results['Delay'] == 4)]['Profit']
-adapt_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 13) & (all_simulation_results['winning_agent'] <= 13) & (all_simulation_results['Delay'] == 4)]['Profit']
-lastminute_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 14) & (all_simulation_results['winning_agent'] <= 14) & (all_simulation_results['Delay'] == 4)]['Profit']
-stealth_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 15) & (all_simulation_results['winning_agent'] <= 15) & (all_simulation_results['Delay'] == 4)]['Profit']
+naive_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3) & (all_simulation_results['Delay'] == 5)]['Profit']
+adapt_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7) & (all_simulation_results['Delay'] == 5)]['Profit']
+lastminute_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 2) & (all_simulation_results['winning_agent'] <= 2) & (all_simulation_results['Delay'] == 5)]['Profit']
+stealth_profits = all_simulation_results[(all_simulation_results['winning_agent'] >= 3) & (all_simulation_results['winning_agent'] <= 3) & (all_simulation_results['Delay'] == 5)]['Profit']
 
 data = [naive_profits, adapt_profits, lastminute_profits, stealth_profits]
 colors = ['green', 'blue', 'yellow', 'purple']
@@ -22,23 +22,23 @@ for median in boxplot['medians']:
     median.set(color='black', linewidth=2)
 
 plt.title('Profit Distribution Stealth Players at Global Delay=2 (Profit Per Win)')
-plt.xlabel('Player')
+plt.xlabel('Strategy')
 plt.ylabel('Profit (ETH)')
-plt.xticks([1, 2, 3, 4], ['Stealth Player 1', 'Stealth Player 2', 'Stealth Player 3', 'Stealth Player 4'])
-plt.ylim(0.00645, 0.0068)
+plt.xticks([1, 2, 3, 4], ['Naive', 'Adaptive', 'Last-minute', 'Stealth'])
+plt.ylim(0.00645, 0.0067)
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 plt.show()
 
-avg_profit_naive = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)]['Profit']
-avg_profit_adapt = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]['Profit']
-avg_profit_lastminute = all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)]['Profit']
+avg_profit_naive = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)]['Profit'].sum()
+avg_profit_adapt = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]['Profit'].sum()
+avg_profit_lastminute = all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)]['Profit'].sum()
 avg_profit_stealth = all_simulation_results[(all_simulation_results['winning_agent'] >= 12) & (all_simulation_results['winning_agent'] <= 15)]['Profit']
 
 
-# print("Average Profit for Naive Agents:", avg_profit_naive)
-# print("Average Profit for Adaptive Agents:", avg_profit_adapt)
-# print("Average Profit for Last-minute Agents:", avg_profit_lastminute)
+print("Average Profit for Naive Agents:", avg_profit_naive)
+print("Average Profit for Adaptive Agents:", avg_profit_adapt)
+print("Average Profit for Last-minute Agents:", avg_profit_lastminute)
 # print("Average Profit for Stealth Agents:", avg_profit_stealth)
 # print("Average Profit for Bluff Agents (True bid):", avg_profit_bluff_true)
 # print("Average Profit for Bluff Agents (Fake bid):", avg_profit_bluff_fake)
@@ -55,53 +55,57 @@ for delay in range(1, 11):  # Assuming delays from 1 to 4 as in your provided co
         (all_simulation_results['winning_agent'] >= 0) &
         (all_simulation_results['winning_agent'] <= 3) &
         (all_simulation_results['Delay'] == delay)
-    ]['Profit']
+    ]['Profit'].sum()
     naive_profit_means.append(naive_profit)
+
 
     adapt_profit = all_simulation_results[
         (all_simulation_results['winning_agent'] >= 4) &
         (all_simulation_results['winning_agent'] <= 7) &
         (all_simulation_results['Delay'] == delay)
-    ]['Profit']
+    ]['Profit'].sum()
     adapt_profit_means.append(adapt_profit)
+
 
     lastminute_profit = all_simulation_results[
         (all_simulation_results['winning_agent'] >= 8) &
         (all_simulation_results['winning_agent'] <= 11) &
         (all_simulation_results['Delay'] == delay)
-    ]['Profit']
+    ]['Profit'].sum()
     lastminute_profit_means.append(lastminute_profit)
+
 
     stealth_profit = all_simulation_results[
         (all_simulation_results['winning_agent'] >= 12) &
         (all_simulation_results['winning_agent'] <= 15) &
         (all_simulation_results['Delay'] == delay)
-    ]['Profit']
+    ]['Profit'].sum()
     stealth_profit_means.append(stealth_profit)
+
 
     bluff_profit_true = all_simulation_results[
         (all_simulation_results['winning_agent'] >= 16) &
         (all_simulation_results['Profit'] > 0) &
         (all_simulation_results['Delay'] == delay)
-    ]['Profit']
+    ]['Profit'].sum()
     bluff_profit_means.append(bluff_profit_true)
 
 # Plotting average profit for each strategy type at different delays
 plt.figure(figsize=(10, 6))
 plt.plot(range(1, 11), naive_profit_means, label='Naive Agents Profit', marker='o')
 plt.plot(range(1, 11), adapt_profit_means, label='Adaptive Agents Profit', marker='o')
-plt.plot(range(1, 11), lastminute_profit_means, label='Last-minute Agents Profit', marker='o')
-plt.plot(range(1, 11), stealth_profit_means, label='Stealth Agents Profit', marker='o')
-plt.plot(range(1, 11), bluff_profit_means, label='Bluff Agents Profit (True bid)', marker='o')
+plt.plot(range(1, 11), lastminute_profit_means, label='Bluff Agents Profit', marker='o')
+# plt.plot(range(1, 11), stealth_profit_means, label='Bluff Agents Profit', marker='o')
+# plt.plot(range(1, 11), bluff_profit_means, label='Bluff Agents Profit (True bid)', marker='o')
 plt.xlabel('Delay')
-plt.ylabel('Average Profit')
-plt.title('Average Profit by Strategy on Different Global Delays')
+plt.ylabel('Aggregated Profit')
+plt.title('Aggregated Profit on Different Global Delays')
 plt.legend(loc='center right', bbox_to_anchor=(0.35, 0.85))
+
 plt.xticks(range(1, 11))
 plt.grid(True)
 plt.show()
 
-import numpy as np
 
 # Setting up the bar width and positions
 bar_width = 0.15
@@ -116,8 +120,8 @@ plt.figure(figsize=(12, 7))
 # Creating bar plots
 plt.bar(r1, naive_profit_means, width=bar_width, label='Naive Agents Profit', color='blue')
 plt.bar(r2, adapt_profit_means, width=bar_width, label='Adaptive Agents Profit', color='green')
-plt.bar(r3, lastminute_profit_means, width=bar_width, label='Last-minute Agents Profit', color='red')
-plt.bar(r4, stealth_profit_means, width=bar_width, label='Stealth Agents Profit', color='yellow')
+plt.bar(r3, lastminute_profit_means, width=bar_width, label='Bluff Agents Profit', color='red')
+# plt.bar(r4, stealth_profit_means, width=bar_width, label='Bluff Agents Profit', color='yellow')
 # plt.bar(r5, bluff_profit_means, width=bar_width, label='Bluff Agents Profit (True bid)', color='purple')
 
 plt.xlabel('Delay (Step)')
