@@ -281,23 +281,23 @@ class Auction(Model):
         # Create Agents
         for i in range(self.num_naive):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            delay = 1
+            delay = i+1
             probability = probabilities[i]
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            delay = random.randint(3, 5)
+            delay = i+3
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability)
             self.schedule.add(a)
 
         for i in range(self.num_lastminute):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            time_reveal_delta = random.randint(8, 10)
+            time_reveal_delta = random.randint(10, 20)
             time_estimate = 1200
-            delay = random.randint(3, 5)
+            delay = i+5
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
                                      time_reveal_delta, time_estimate, delay, probability)
@@ -305,9 +305,9 @@ class Auction(Model):
 
         for i in range(self.num_stealth):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            time_reveal_delta = random.randint(8, 10)
+            time_reveal_delta = random.randint(10, 20)
             time_estimate = 1200
-            delay = random.randint(3, 5)
+            delay = i+7
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                          time_reveal_delta, time_estimate, delay, probability)
@@ -315,10 +315,10 @@ class Auction(Model):
 
         for i in range(self.num_bluff):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
-            time_reveal_delta = random.randint(8, 10)
+            time_reveal_delta = random.randint(10, 20)
             time_estimate = 1200
-            bluff_value = np.random.uniform(0.25, 0.27)
-            delay = random.randint(3, 5)
+            bluff_value = np.random.uniform(0.2, 0.21)
+            delay = i+9
             probability = np.random.uniform(0.8, 1.0)
             a = PlayerWithBluffStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute + self.num_stealth,
                                         self, pm, time_reveal_delta, time_estimate, bluff_value, delay, probability)
@@ -388,10 +388,10 @@ class Auction(Model):
 
 
 # Setup and run the model
-model = Auction(15, 0, 0, 0, 0, rate_public_mean=0.085, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                T_mean=12, T_sd=0.1, delay=1)
+model = Auction(3, 3, 3, 3, 3, rate_public_mean=0.08, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
+                T_mean=12, T_sd=0, delay=1)
 
-for i in range(int(model.T * 100)):
+for i in range(int(model.T * 100+1)):
     model.step()
 
 # Data Collection
@@ -439,36 +439,72 @@ dfs = []
 for i in range(len(model_data)) :
     current_bids = model_data["Current Bids"].iloc[i]
     current_agents = model_data["Agents"].iloc[i]
+
     bid_dict = {str(agent) : bid for agent, bid in zip(current_agents, current_bids)}
 
     # Convert the dictionary to a DataFrame and store it in the list
     dfs.append(pd.DataFrame(bid_dict, index=[i]))
-
 all_bids = pd.concat(dfs)
-
 public_signals = model_data["Public Signal"]
 private_signal_max = model_data["Private Signal Max"]
 aggregated_signal_max = model_data["Aggregated Signal Max"]
 
 # Plot the data
-plt.figure(figsize=(20, 12))
-plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(all_bids.columns))))
+agent_types = ['Naive', 'Naive','Naive', 'Adaptive', 'Adaptive','Adaptive', 'Last-minute', 'Last-minute', 'Last-minute', 'Stealth', 'Stealth','Stealth','Bluff', 'Bluff', 'Bluff']  # Extend this list based on your agents
+agent_names = [f"{agent_type} Agent {i+1}" for i, agent_type in enumerate(agent_types)]
+all_bids.columns = agent_names
 
-fontsize = 12
+
+# Plotting using Seaborn for a better appearance
+sns.set(style="white", palette="inferno")
+all_bids_reset_index = all_bids.reset_index(drop=True)
+# Create a figure with a single subplot
+f, ax = plt.subplots(1, 1, figsize=(15, 10))
+
+# Plotting the main data
 for column in all_bids.columns:
-    plt.plot(all_bids.index, all_bids[column], label=column,linewidth=2)
-plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
-plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
-plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
-plt.xlabel('Time Step', fontsize=fontsize)
-plt.ylabel('Bid Value', fontsize=fontsize)
-plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=12)
-plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
-plt.grid(False)
-plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-plt.yticks(np.arange(0, 0.27, 0.01), fontsize=fontsize)
-plt.axvline(1200, color='k')
-plt.xlim(0), plt.ylim(0)
+    sns.lineplot(data=all_bids, x=all_bids.index, y=column, ax=ax, label=column, linewidth = 3)
+
+# Overlaying the zoomed area with a secondary axis
+axins = ax.inset_axes([0.5, 0.45, 0.35, 0.35])  # X, Y, width, height in the figure proportion
+for column in all_bids.columns:
+    sns.lineplot(data=all_bids, x=all_bids.index, y=column, ax=axins, linewidth = 2.5)
+
+# Remove the legend from the inset plot
+axins.legend_ = None
+
+# Subplot title
+axins.set_title('Zoomed in at t = 1200', pad=10, fontsize=16)
+
+# Set the range of the zoomed area
+axins.set_xlim(1170, 1201)
+axins.set_ylim(0, 0.23)
+axins.tick_params(labelsize=16)
+
+ax.axvline(1200, color='k', linestyle='--', linewidth=2)
+axins.axvline(1200, color='k', linestyle='--', linewidth=2)
+# Set font size of the main legend
+ax.legend(fontsize=16)
+
+# Set font sizes of labels and title
+ax.set_xlabel('Time (ms)', fontsize=16)
+ax.set_ylabel('Bid Value (ETH)', fontsize=16)
+ax.title.set_size(16)
+
+# Set font size of tick labels
+ax.tick_params(labelsize=16)
+
+# Set the ylim for the main plot
+ax.set_xlim(0, 1250)
+ax.set_ylim(0, 0.23)
+ax.set_yticks(np.arange(0, 0.23, 0.02))
+
+# Bring back the border for the inset plot and remove the connecting lines
+axins.set_frame_on(True)
+
+
+
+# Display the plot
 plt.show()
 
 
