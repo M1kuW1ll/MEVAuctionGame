@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 # Read all your dataframes
-all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/last_eps0std0.csv')
-all_simulation_results2 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.01std0_delay4.csv')
-all_simulation_results3 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.02std0_delay4.csv')
-all_simulation_results4 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.03std0_delay4.csv')
-all_simulation_results5 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.04std0_delay4.csv')
-all_simulation_results6 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.05std0_delay4.csv')
-all_simulation_results7 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.1std0.csv')
-all_simulation_results8 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.15std0.csv')
-all_simulation_results9 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.2std0.csv')
-all_simulation_results10 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.25std0.csv')
-all_simulation_results11 = pd.read_csv('round4_profitupdate/std0_new/last_eps0.3std0.csv')
+all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')
+all_simulation_results2 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.01std0_delay4.csv')
+all_simulation_results3 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.02std0_delay4.csv')
+all_simulation_results4 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.03std0_delay4.csv')
+all_simulation_results5 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.04std0_delay4.csv')
+all_simulation_results6 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
+all_simulation_results7 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
+all_simulation_results8 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
+all_simulation_results9 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
+all_simulation_results10 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
+all_simulation_results11 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
 
 # Initialize lists to store profit means for each dataframe
 naive_profit_means = []
@@ -61,7 +61,7 @@ plt.title('Impact of Revealing time (Epsilon) on Last-minute/Stealth Strategy Ag
 group_width = len(dataframes) * bar_width
 center_positions = r + (group_width / 4)
 
-custom_labels = ["0","0.01","0.02","0.03","0.04", "0.05", "0.1", "0.15", "0.2", "0.25", "0.3"]
+custom_labels = ["0","10","20","30","40", "50", "100", "150", "200", "250", "300"]
 
 plt.xticks(center_positions, custom_labels)
 plt.legend(loc='center right', bbox_to_anchor=(1.2, 0.5))
@@ -75,29 +75,29 @@ lastminute_wins = []
 stealth_wins = []
 
 for df in dataframes:
-    naive_win = len(df[(df['winning_agent'] >= 0) & (df['winning_agent'] <= 3) & (df['Delay'] == 4)])
+    naive_win = len(df[(df['winning_agent'] >= 0) & (df['winning_agent'] <= 3) & (df['Delay'] == 4)])/100
     naive_wins.append(naive_win)
 
-    adapt_win = len(df[(df['winning_agent'] >= 4) & (df['winning_agent'] <= 7) & (df['Delay'] == 4)])
+    adapt_win = len(df[(df['winning_agent'] >= 4) & (df['winning_agent'] <= 7) & (df['Delay'] == 4)])/100
     adapt_wins.append(adapt_win)
 
-    lastminute_win = len(df[(df['winning_agent'] >= 8) & (df['winning_agent'] <= 11) & (df['Delay'] == 4)])
+    lastminute_win = len(df[(df['winning_agent'] >= 8) & (df['winning_agent'] <= 11) & (df['Delay'] == 4)])/100
     lastminute_wins.append(lastminute_win)
 
-plt.figure(figsize=(12, 7))
+plt.figure(figsize=(15, 9))
 
-plt.plot(custom_labels, naive_wins, label='Naive', marker='o', linestyle='-')
-plt.plot(custom_labels, adapt_wins, label='Adaptive', marker='o', linestyle='-')
-plt.plot(custom_labels, lastminute_wins, label='Last-minute/Stealth', marker='o', linestyle='-')
+plt.plot(custom_labels, naive_wins, label='Naive', marker='o', linestyle='-', linewidth=3.3 )
+plt.plot(custom_labels, adapt_wins, label='Adaptive', marker='o', linestyle='-', linewidth=3.3)
+plt.plot(custom_labels, lastminute_wins, label='Bluff', marker='o', linestyle='-', linewidth=3.3, color="red")
 # plt.plot(custom_labels, stealth_wins, label='Stealth Agents Wins', marker='o', linestyle='-')
 
-plt.xlabel('Epsilon (seconds)')
-plt.ylabel('Number of Wins')
-plt.title('Impact of Revealing Time (Epsilon) on Last-minute/Stealth Strategy Win Rate (Global Delay = 4, std = 0)')
-plt.xticks(custom_labels)
-plt.legend(loc='center right', bbox_to_anchor=(0.95, 0.45))
-
+plt.xlabel('Revealing Time $\epsilon$ (ms)', fontsize = 35)
+plt.ylabel('Win Rate (%)', fontsize = 35)
+plt.xticks(custom_labels, fontsize = 35)
+plt.legend(fontsize = 35)
+plt.yticks(fontsize = 35)
 plt.grid(True)
+plt.ylim(20,46)
 plt.show()
 
 all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')

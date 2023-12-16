@@ -175,15 +175,15 @@ plt.ylim(0.0064, 0.0068)
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 plt.legend([boxplot_naive["boxes"][0], boxplot_lastminute["boxes"][0], boxplot_adapt["boxes"][0], boxplot_adapt2["boxes"][0]],
-           ['Naive', 'Last-minute/Stealth/Bluff', 'Adaptive (With Bluff)', 'Adaptive (Without Bluff)'], bbox_to_anchor=(0.3, 0.85))
+           ['Naive', 'Last-minute/Stealth/Bluff', 'Adaptive (Profile 2)', 'Adaptive (Profile 1)'], bbox_to_anchor=(0.3, 0.85))
 plt.show()
 
 
 
-naive_data['Strategy'] = 'Naive Strategy'
-adapt_data['Strategy'] = 'Adaptive Strategy (With Bluff)'
-lastminute_data['Strategy'] = 'Last-minute/Stealth/Bluff Strategy'
-adapt2_data['Strategy'] = 'Adaptive Strategy (Without Bluff)'
+naive_data['Strategy'] = 'Naive'
+adapt_data['Strategy'] = 'Adaptive (Profile 2)'
+lastminute_data['Strategy'] = 'Last-minute/Bluff'
+adapt2_data['Strategy'] = 'Adaptive (Profile 1)'
 
 # Combine the data into a single DataFrame
 combined_data = pd.concat([naive_data, adapt_data, lastminute_data, adapt2_data])
@@ -197,7 +197,7 @@ ax = sns.boxplot(x='Delay', y='Profit', hue='Strategy', data=combined_data,
 plt.title('Profit Distribution by Strategy on Different Global Delays (Epsilon=0, std of D=0)')
 plt.xlabel('Global Delay (ms)')
 plt.ylabel('Profit per Win (ETH)')
-plt.ylim(0.0064, 0.0068)
+plt.ylim(0.0064, 0.0069)
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 handles, labels = ax.get_legend_handles_labels()
@@ -209,67 +209,101 @@ median_patch = plt.Line2D([], [], color='black', label='Median')
 handles.append(median_patch)
 labels.append('Median')
 
-plt.legend(handles, labels, bbox_to_anchor=(0.1, 0.75))
+plt.legend(handles, labels)
 
 ax.set_xticklabels(xtick_labels)
 sns.despine()
 plt.show()
 
 
+naive_data = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)]
+adapt_data = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]
+lastminute_data = all_simulation_results[(all_simulation_results['winning_agent'] >= 8) & (all_simulation_results['winning_agent'] <= 11)]
+adapt2_data = adaptive_results[(adaptive_results['winning_agent'] >= 4) & (adaptive_results['winning_agent'] <= 7)]
 
 
-plt.figure(figsize=(20, 12))
+naive_profits_by_delay = []
+for delay in range(1, 11):
+    profits = naive_data[naive_data['Delay'] == delay]['Profit'].sum()
+    naive_profits_by_delay.append(profits)
 
-group_spacing = 0.2
-
-
-x_naive = np.arange(1, 11)
-x_adapt = [x + group_spacing for x in x_naive]
-x_lastminute = [x + group_spacing for x in x_adapt]
-x_stealth = [x + group_spacing for x in x_lastminute]
-
-bar_width = 0.15
-
-# Plot bars for each strategy
-plt.bar(x_naive, naive_profits_by_delay, width=bar_width, color='yellow', label='Naive')
-plt.bar(x_adapt, adapt_profits_by_delay, width=bar_width, color='blue', label='Adapt')
-plt.bar(x_lastminute, lastminute_profits_by_delay, width=bar_width, color='red', label='Last-minute')
-plt.bar(x_stealth, stealth_profits_by_delay, width=bar_width, color='green', label='Stealth')
-
-# Labeling and title
-plt.title('Average Profit on Different Global Delays for Different Strategies')
-plt.xlabel('Global Delay (Steps)')
-plt.ylabel('Profit (ETH)')
-group_centers = np.arange(1, 11) + 1.5 * group_spacing
-plt.xticks(group_centers, range(1,11))
-
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.legend()
-plt.show()
-
-naive_0_data = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]
-
-profits_by_delay = []
-
+adapt_profits_by_delay = []
 for delay in range (1,11):
-    total_profit = naive_0_data[naive_0_data['Delay'] == delay]['Profit']
-    profits_by_delay.append(total_profit)
+    profits = adapt_data[adapt_data['Delay'] == delay]['Profit'].sum()
+    adapt_profits_by_delay.append(profits)
 
-plt.figure(figsize=(10, 6))
+lastminute_profits_by_delay = []
+for delay in range(1, 11):
+    profits = lastminute_data[lastminute_data['Delay'] == delay]['Profit'].sum()
+    lastminute_profits_by_delay.append(profits)
 
-# Create a bar plot for aggregated profits
-boxplot = plt.boxplot(profits_by_delay, patch_artist=True, boxprops=dict(facecolor="green"), whis = 10)
+adapt2_profits_by_delay = []
+for delay in range (1, 11):
+    profits = adapt2_data[adapt2_data['Delay'] == delay]['Profit'].sum()
+    adapt2_profits_by_delay.append(profits)
 
-for median in boxplot['medians']:
-    median.set(color='black', linewidth=2)
 
-plt.title('Profit Distribution of Adaptive Agent 1 on Different Global Delays')
-plt.xlabel('Global Delay (Step)')
-plt.ylabel('Profit (ETH)')
-plt.xticks(range(1, 11))  # Adjust the tick labels to match the delay values
-plt.ylim(0.0064, 0.0069)
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+delays = list(range(1, 11))
+data = {
+    'Delay': delays * 3,
+    'Profit': naive_profits_by_delay + adapt_profits_by_delay + lastminute_profits_by_delay,
+    'Strategy': ['Naive']*10  + ['Adaptive']*10 + ['Last-minute']*10
+}
+
+df = pd.DataFrame(data)
+
+# Setting the plasma palette
+palette = sns.color_palette("plasma", 3)
+
+# Creating the plot
+plt.figure(figsize=(20, 10))
+
+ax = sns.barplot(x='Delay', y='Profit', hue='Strategy', data=df, palette=palette)
+ax.set_xticklabels(xtick_labels)
+plt.xlabel('Global Delay (ms)', fontsize = 25)
+plt.ylabel('Average Profit ( $10^{-4}$ ETH)', fontsize = 25)
+plt.xticks(fontsize = 25)
+plt.yticks(fontsize = 25)
+plt.grid(True, axis='y', linestyle='--', linewidth=0.7)
+plt.legend(fontsize = 25, ncol = 4)
+plt.ylim(0,25)
 plt.tight_layout()
-
 plt.show()
+
+adapt2_profits_by_delay = []
+for delay in range (1, 11):
+    profits = adapt2_data[adapt2_data['Delay'] == delay]['Profit'].sum()
+    adapt2_profits_by_delay.append(profits)
+
+naive_profits_by_delay = []
+for delay in range(1, 11):
+    profits = naive_data[naive_data['Delay'] == delay]['Profit'].median()
+    naive_profits_by_delay.append(profits)
+
+print(naive_profits_by_delay)
+print(adapt2_profits_by_delay)
+# naive_0_data = all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)]
+#
+# profits_by_delay = []
+#
+# for delay in range (1,11):
+#     total_profit = naive_0_data[naive_0_data['Delay'] == delay]['Profit']
+#     profits_by_delay.append(total_profit)
+#
+# plt.figure(figsize=(10, 6))
+#
+# # Create a bar plot for aggregated profits
+# boxplot = plt.boxplot(profits_by_delay, patch_artist=True, boxprops=dict(facecolor="green"), whis = 10)
+#
+# for median in boxplot['medians']:
+#     median.set(color='black', linewidth=2)
+#
+# plt.title('Profit Distribution of Adaptive Agent 1 on Different Global Delays')
+# plt.xlabel('Global Delay (Step)')
+# plt.ylabel('Profit (ETH)')
+# plt.xticks(range(1, 11))  # Adjust the tick labels to match the delay values
+# plt.ylim(0.0064, 0.0069)
+# plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+# plt.tight_layout()
+#
+# plt.show()

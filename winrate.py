@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('round4_profitupdate/std0_new/last_eps0.2std0.csv')
+all_simulation_results = pd.read_csv('round4_profitupdate/std0_new/last_eps0std0.csv')
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 0)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 1) & (all_simulation_results['winning_agent'] <= 1)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 2) & (all_simulation_results['winning_agent'] <= 2)])
@@ -31,7 +31,7 @@ for delay in range (1, 11):
     num_naive_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 0) &
                                       (all_simulation_results['winning_agent'] <= 3) &
-                                      (all_simulation_results['Delay'] == delay)
+                                      (all_simulation_results['Delay'] == delay)/100
                                       ])
     naive_winning_counts.append(num_naive_winning_delay)
     print("Naive Agents Winning with delay", delay, ":", num_naive_winning_delay)
@@ -42,7 +42,7 @@ for delay in range (1, 11):
     num_adapt_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 4) &
                                       (all_simulation_results['winning_agent'] <= 7) &
-                                      (all_simulation_results['Delay'] == delay)
+                                      (all_simulation_results['Delay'] == delay)/100
                                       ])
     adapt_winning_counts.append(num_adapt_winning_delay)
     print("Adaptive Agents Winning with delay", delay, ":", num_adapt_winning_delay)
@@ -53,7 +53,7 @@ for delay in range (1, 11):
     num_lastminute_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 8) &
                                       (all_simulation_results['winning_agent'] <= 11) &
-                                      (all_simulation_results['Delay'] == delay)
+                                      (all_simulation_results['Delay'] == delay)/100
                                       ])
     lastminute_winning_counts.append(num_lastminute_winning_delay)
     print("Last-minute Agents Winning with delay", delay, ":", num_lastminute_winning_delay)
@@ -64,7 +64,7 @@ for delay in range (1, 11):
     num_stealth_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 12) &
                                       (all_simulation_results['winning_agent'] <= 15) &
-                                      (all_simulation_results['Delay'] == delay)
+                                      (all_simulation_results['Delay'] == delay)/100
                                       ])
     stealth_winning_counts.append(num_stealth_winning_delay)
     print("Stealth Agents Winning with delay", delay, ":", num_stealth_winning_delay)
