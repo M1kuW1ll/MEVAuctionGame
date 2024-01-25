@@ -65,7 +65,7 @@ bar2.set_xticklabels([f'{delay*10:.0f}' for delay in delays])
 # Set the title and labels
 plt.xticks(fontsize = 40)
 plt.yticks(fontsize = 40)
-plt.xlabel('Individual Delay (10ms)', fontsize=40)
+plt.xlabel('Individual Delays (ms)', fontsize=40)
 plt.ylabel('Average Profit ($10^{-4}$ ETH)', fontsize=40)
 plt.grid(axis='y', linestyle='--', color='grey', linewidth=0.7)
 # Show the plot
