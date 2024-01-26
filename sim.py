@@ -189,7 +189,6 @@ class Auction(Model):
 
     def create_players(self, player_strategies) :
         pm = 0.00659
-        probability = np.random.uniform(0.8, 1.0)
         delays = [1] * 2 + [3] * 3 + [5] * 5  # Pattern of delays for the players
 
         # Additional parameters for LastMinute strategy
@@ -197,6 +196,8 @@ class Auction(Model):
         time_estimate = 1200
 
         for i, (strategy, delay) in enumerate(zip(player_strategies, delays)) :
+            probability = np.random.uniform(0.8, 1.0)
+
             if strategy == 'Naive' :
                 player = PlayerWithNaiveStrategy(i, self, pm, delay, probability)
             elif strategy == 'Adaptive' :
@@ -308,19 +309,39 @@ delays = [1]*2 + [3]*3 + [5]*5
 # Generate all combinations of strategies for 10 players
 all_combinations = itertools.product(strategies, repeat=10)
 
+comb_num = 0
 # Iterate and run the model for each combination
 for combination in all_combinations:
     player_info = list(zip(combination, delays))
-
+    comb_num += 1
+    print(comb_num)
     # Print strategy and delay for each player
-    print("Running combination:")
-    for idx, (strategy, delay) in enumerate(player_info) :
-        print(f"Player {idx + 1}: Strategy - {strategy}, Delay - {delay}")
-
+    # print("Running combination:")
+    # for idx, (strategy, delay) in enumerate(player_info) :
+    #     print(f"Player {idx}: Strategy - {strategy}, Delay - {delay}")
     model = Auction(combination, delay=1, rate_public_mean=0.082, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0, T_mean=12, T_sd=0)
     # Run the model steps as required
     for i in range(int(model.T * 100)):
         model.step()
+
+    # model_data = model.datacollector.get_model_vars_dataframe()
+    # agent_data = model.datacollector.get_agent_vars_dataframe()
+    #
+    # # Print the simulation details
+    # print(f"Public signal number: {model.public_signal}")
+    # print(f"Public signal value: {model.public_signal_value}")
+    # print(f"Private signal number: {model.private_signal}")
+    # print(f"Auction time steps: {model.schedule.time}")
+    # print('Winning Agent ID: ' + str(model.winning_agents[-1 :][0]))
+    # print('Winning bid value: ' + str(model.max_bids[-1 :][0]))
+    # print(f"Winner Profit: {model.winner_profit}")
+    # print(f"Winner Total Signal: {model.winner_aggregated_signal}")
+    # print(f"Winner Probility: {model.winner_probability}")
+    # print(f"Auction Efficiency: {model.auction_efficiency}")
+    # for i in agent_data.index.levels[0] :
+    #     print("Probability:", agent_data.loc[i, 'Probability'].to_dict())
+
+
 # Setup and run the model
 # model = Auction(4, 4, 4, rate_public_mean=0.082, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
 #                 T_mean=12, T_sd=0, delay=1)
@@ -370,6 +391,7 @@ print('Winning bid value: ' + str(model.max_bids[-1:][0]))
 print(f"Winner Profit: {model.winner_profit}")
 print(f"Winner Total Signal: {model.winner_aggregated_signal}")
 print(f"Winner Probility: {model.winner_probability}")
+
 print('Winning bid time: ' + str(time_step) + ' ms')
 print(f"Auction Efficiency: {model.auction_efficiency}")
 print(model.aggregated_signal_max-model.winner_aggregated_signal)
@@ -410,7 +432,7 @@ plt.xlabel('Time Step', fontsize=fontsize)
 plt.ylabel('Bid Value', fontsize=fontsize)
 plt.legend(title='Agent ID', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=12)
 plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
-plt.grid(False
+plt.grid(False)
 plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
 plt.yticks(np.arange(0, 0.27, 0.01), fontsize=fontsize)
 plt.axvline(1200, color='k')
