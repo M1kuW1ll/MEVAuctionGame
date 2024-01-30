@@ -506,57 +506,57 @@ print(model.aggregated_signal_max-model.winner_aggregated_signal)
 #     dfs.append(pd.DataFrame(bid_dict, index=[i]))
 
 # Modify the loop to capture bids and signals separately
-dfs = []
-for i in range(len(model_data)):
-    current_bids = model_data["Current Bids"].iloc[i]
-    current_agents = model_data["Agents"].iloc[i]
-
-    if current_bids:
-        bids, aggregated_signals = zip(*current_bids)
-    else:
-        bids, aggregated_signals = [], []
-
-    for agent, bid, signal in zip(current_agents, bids, aggregated_signals):
-        dfs.append(pd.DataFrame({
-            "Time Step": [i],
-            "Agent ID": [f"Agent_{agent}"],
-            "Bid": [bid],
-            "Signal": [signal]
-        }))
-
-# Concatenate all DataFrames
-all_bids = pd.concat(dfs)
-public_signals = model_data["Public Signal"]
-private_signal_max = model_data["Private Signal Max"]
-aggregated_signal_max = model_data["Aggregated Signal Max"]
-signal_decrease_max = model_data["Signal Decrease Max"]
-# Pivot the DataFrame to have time steps as index and agents' bids as columns
-pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
+# dfs = []
+# for i in range(len(model_data)):
+#     current_bids = model_data["Current Bids"].iloc[i]
+#     current_agents = model_data["Agents"].iloc[i]
+#
+#     if current_bids:
+#         bids, aggregated_signals = zip(*current_bids)
+#     else:
+#         bids, aggregated_signals = [], []
+#
+#     for agent, bid, signal in zip(current_agents, bids, aggregated_signals):
+#         dfs.append(pd.DataFrame({
+#             "Time Step": [i],
+#             "Agent ID": [f"Agent_{agent}"],
+#             "Bid": [bid],
+#             "Signal": [signal]
+#         }))
+#
+# # Concatenate all DataFrames
+# all_bids = pd.concat(dfs)
+# public_signals = model_data["Public Signal"]
+# private_signal_max = model_data["Private Signal Max"]
+# aggregated_signal_max = model_data["Aggregated Signal Max"]
+# signal_decrease_max = model_data["Signal Decrease Max"]
+# # Pivot the DataFrame to have time steps as index and agents' bids as columns
+# pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
 
 # Plotting
-plt.figure(figsize=(20, 12))
-plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(pivot_bids.columns))))
-
-fontsize = 12
-for column in pivot_bids.columns:
-    plt.plot(pivot_bids.index, pivot_bids[column], label=column, linewidth=2)
-
-# Adding other signals to the plot
-plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
-plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
-plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
-plt.plot(signal_decrease_max.index, -signal_decrease_max, label='Decrease Max', linewidth=3.5, color='red')
-# Rest of the plotting code remains the same
-plt.xlabel('Time Step', fontsize=fontsize)
-plt.ylabel('Bid Value', fontsize=fontsize)
-plt.legend(title='Agent ID', fontsize=12)
-plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
-plt.grid(axis='y', linestyle='--', linewidth=0.5, color='gray')
-plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-plt.yticks(np.arange(-0.1, 0.27, 0.01), fontsize=fontsize)
-plt.axvline(1200, color='k')
-
-plt.show()
+# plt.figure(figsize=(20, 12))
+# plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(pivot_bids.columns))))
+#
+# fontsize = 12
+# for column in pivot_bids.columns:
+#     plt.plot(pivot_bids.index, pivot_bids[column], label=column, linewidth=2)
+#
+# # Adding other signals to the plot
+# plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
+# plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
+# plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
+# plt.plot(signal_decrease_max.index, -signal_decrease_max, label='Decrease Max', linewidth=3.5, color='red')
+# # Rest of the plotting code remains the same
+# plt.xlabel('Time Step', fontsize=fontsize)
+# plt.ylabel('Bid Value', fontsize=fontsize)
+# plt.legend(title='Agent ID', fontsize=12)
+# plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
+# plt.grid(axis='y', linestyle='--', linewidth=0.5, color='gray')
+# plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
+# plt.yticks(np.arange(-0.1, 0.27, 0.01), fontsize=fontsize)
+# plt.axvline(1200, color='k')
+#
+# plt.show()
 # all_bids = pd.concat(dfs)
 #
 # public_signals = model_data["Public Signal"]
