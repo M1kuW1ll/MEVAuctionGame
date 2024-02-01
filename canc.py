@@ -300,7 +300,7 @@ class Auction(Model):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.4)
+            decrease_probability = np.random.uniform(0.3, 0.5)
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability, decrease_probability)
             self.schedule.add(a)
 
@@ -308,7 +308,7 @@ class Auction(Model):
             pm = norm.rvs(loc=0.00659, scale=0.0001)
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.4)
+            decrease_probability = np.random.uniform(0.3, 0.5)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability, decrease_probability)
             self.schedule.add(a)
 
@@ -318,7 +318,7 @@ class Auction(Model):
             time_estimate = 1200
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.4)
+            decrease_probability = np.random.uniform(0.3, 0.5)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
                                      time_reveal_delta, time_estimate, delay, probability, decrease_probability)
             self.schedule.add(a)
@@ -329,7 +329,7 @@ class Auction(Model):
             time_estimate = 1200
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.4)
+            decrease_probability = np.random.uniform(0.3, 0.5)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                          time_reveal_delta, time_estimate, delay, probability, decrease_probability)
             self.schedule.add(a)
@@ -506,32 +506,32 @@ print(model.aggregated_signal_max-model.winner_aggregated_signal)
 #     dfs.append(pd.DataFrame(bid_dict, index=[i]))
 
 # Modify the loop to capture bids and signals separately
-# dfs = []
-# for i in range(len(model_data)):
-#     current_bids = model_data["Current Bids"].iloc[i]
-#     current_agents = model_data["Agents"].iloc[i]
-#
-#     if current_bids:
-#         bids, aggregated_signals = zip(*current_bids)
-#     else:
-#         bids, aggregated_signals = [], []
-#
-#     for agent, bid, signal in zip(current_agents, bids, aggregated_signals):
-#         dfs.append(pd.DataFrame({
-#             "Time Step": [i],
-#             "Agent ID": [f"Agent_{agent}"],
-#             "Bid": [bid],
-#             "Signal": [signal]
-#         }))
-#
-# # Concatenate all DataFrames
-# all_bids = pd.concat(dfs)
-# public_signals = model_data["Public Signal"]
-# private_signal_max = model_data["Private Signal Max"]
-# aggregated_signal_max = model_data["Aggregated Signal Max"]
-# signal_decrease_max = model_data["Signal Decrease Max"]
-# # Pivot the DataFrame to have time steps as index and agents' bids as columns
-# pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
+dfs = []
+for i in range(len(model_data)):
+    current_bids = model_data["Current Bids"].iloc[i]
+    current_agents = model_data["Agents"].iloc[i]
+
+    if current_bids:
+        bids, aggregated_signals = zip(*current_bids)
+    else:
+        bids, aggregated_signals = [], []
+
+    for agent, bid, signal in zip(current_agents, bids, aggregated_signals):
+        dfs.append(pd.DataFrame({
+            "Time Step": [i],
+            "Agent ID": [f"Agent_{agent}"],
+            "Bid": [bid],
+            "Signal": [signal]
+        }))
+
+# Concatenate all DataFrames
+all_bids = pd.concat(dfs)
+public_signals = model_data["Public Signal"]
+private_signal_max = model_data["Private Signal Max"]
+aggregated_signal_max = model_data["Aggregated Signal Max"]
+signal_decrease_max = model_data["Signal Decrease Max"]
+# Pivot the DataFrame to have time steps as index and agents' bids as columns
+pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
 
 # Plotting
 # plt.figure(figsize=(20, 12))

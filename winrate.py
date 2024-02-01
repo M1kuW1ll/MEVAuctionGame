@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('round4_profitupdate/ts50ms_444.csv')
+all_simulation_results = pd.read_csv('cancellation_4440.csv')
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 2) & (all_simulation_results['winning_agent'] <= 2)])
@@ -31,7 +31,7 @@ for delay in range (1, 11):
     num_naive_winning_delay = len(all_simulation_results[
                                       (all_simulation_results['winning_agent'] >= 0) &
                                       (all_simulation_results['winning_agent'] <= 3) &
-                                      (all_simulation_results['Delay'] == delay)/100
+                                      (all_simulation_results['Delay'] == delay)
                                       ])
     naive_winning_counts.append(num_naive_winning_delay)
     print("Naive Agents Winning with delay", delay, ":", num_naive_winning_delay)
