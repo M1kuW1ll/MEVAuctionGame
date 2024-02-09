@@ -3,6 +3,9 @@ import itertools
 import pyspiel
 import pandas as pd
 import numpy as np
+from open_spiel.python.egt import alpharank, heuristic_payoff_table
+from open_spiel.python.egt import alpharank_visualizer
+
 
 strategies = ['Naive', 'Adaptive', 'LastMinute']
 delays = [1]*2 + [3]*2 + [5]*6
@@ -70,3 +73,18 @@ df.to_csv(csv_file_path, index=False)
 
 print(f"Results saved to {csv_file_path}")
 
+payoff_matrix = np.array(accumulated_profits_list)
+payoff_tables = [heuristic_payoff_table.from_matrix_game(payoff_matrix)]
+
+# Compute Alpha-Rank
+alpharank_scores = alpharank.compute(payoff_tables, alpha=1e-2)
+
+print("Alpha-Rank Scores:", alpharank_scores)
+
+alpharank_data = [{'Profile': str(profile), 'Alpha-Rank Score': score}
+        for profile, score in zip(indistinguishable_profiles, alpharank_scores)]
+
+df = pd.DataFrame(alpharank_data)
+df.to_csv('alpha_rank_scores.csv', index=False)
+
+print(f"Alpha-Rank scores saved to {csv_file_path}")
