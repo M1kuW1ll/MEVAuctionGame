@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 # Read all your dataframes
-all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')
-all_simulation_results2 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.01std0_delay4.csv')
-all_simulation_results3 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.02std0_delay4.csv')
-all_simulation_results4 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.03std0_delay4.csv')
-all_simulation_results5 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.04std0_delay4.csv')
-all_simulation_results6 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
-all_simulation_results7 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
-all_simulation_results8 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
-all_simulation_results9 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
-all_simulation_results10 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
-all_simulation_results11 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
+all_simulation_results1 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0std0.csv')
+all_simulation_results2 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.01std0_delay4.csv')
+all_simulation_results3 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.02std0_delay4.csv')
+all_simulation_results4 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.03std0_delay4.csv')
+all_simulation_results5 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.04std0_delay4.csv')
+all_simulation_results6 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
+all_simulation_results7 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
+all_simulation_results8 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
+all_simulation_results9 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
+all_simulation_results10 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
+all_simulation_results11 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
 
 # Initialize lists to store profit means for each dataframe
 naive_profit_means = []
@@ -100,13 +100,13 @@ plt.grid(True)
 plt.ylim(20,46)
 plt.show()
 
-all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')
-all_simulation_results2 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
-all_simulation_results3 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
-all_simulation_results4 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
-all_simulation_results5 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
-all_simulation_results6 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
-all_simulation_results7 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
+all_simulation_results1 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0std0.csv')
+all_simulation_results2 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
+all_simulation_results3 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
+all_simulation_results4 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
+all_simulation_results5 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
+all_simulation_results6 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
+all_simulation_results7 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
 
 df2 = [all_simulation_results1, all_simulation_results2, all_simulation_results3, all_simulation_results4,
               all_simulation_results5, all_simulation_results6, all_simulation_results7]

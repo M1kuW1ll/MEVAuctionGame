@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 from scipy.stats import poisson, norm
 from collections import deque
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import random
 from mesa import Agent, Model
 from mesa.time import RandomActivation, SimultaneousActivation

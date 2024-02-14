@@ -80,7 +80,7 @@ import seaborn as sns
 #
 # plt.show()
 
-all_simulation_results = pd.read_csv('round4_profitupdate/eof_10proba.csv')
+all_simulation_results = pd.read_csv('../round4_profitupdate/eof_10proba.csv')
 probabilities = np.arange(0.8, 1, 0.02)
 
 winning_agent_counts = all_simulation_results['Probability'].value_counts().reset_index()/100

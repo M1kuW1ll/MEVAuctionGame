@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('round4_profitupdate/eff_10naive_0.8eof.csv')
+all_simulation_results = pd.read_csv('../round4_profitupdate/eff_10naive_0.8eof.csv')
 efficiency = all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 9)]['efficiency']
 efficiency_means = []
 

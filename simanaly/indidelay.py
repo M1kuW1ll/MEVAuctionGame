@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-all_simulation_results = pd.read_csv('round4_profitupdate/eof_10indi_0.8eof.csv')
+all_simulation_results = pd.read_csv('../round4_profitupdate/eof_10indi_0.8eof.csv')
 
 delays = np.arange(1, 11, 1)
 
@@ -26,7 +26,7 @@ plt.show()
 
 
 
-data = pd.read_csv('round4_profitupdate/eof_10indi_0.8eof.csv')
+data = pd.read_csv('../round4_profitupdate/eof_10indi_0.8eof.csv')
 
 
 

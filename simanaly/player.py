@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.colors as mcolors
 
-all_simulation_results = pd.read_csv('cancellation_4440.csv')
-adaptive_results = pd.read_csv('round4_profitupdate/std0_new/last_eps0std0.csv')
+all_simulation_results = pd.read_csv('../cancellation_4440.csv')
+adaptive_results = pd.read_csv('../round4_profitupdate/std0_new/last_eps0std0.csv')
 
 num_player0_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] == 0)])
 num_player1_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] == 1)])

@@ -116,15 +116,15 @@ import matplotlib.patches as mpatches
 #     print("\n")
 
 
-all_simulation_results1 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0std0.csv')
-all_simulation_results2 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
-all_simulation_results3 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
-all_simulation_results4 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
-all_simulation_results5 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
-all_simulation_results6 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
-all_simulation_results7 = pd.read_csv('round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
+all_simulation_results1 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0std0.csv')
+all_simulation_results2 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.05std0.csv')
+all_simulation_results3 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.1std0.csv')
+all_simulation_results4 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.15std0.csv')
+all_simulation_results5 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.2std0.csv')
+all_simulation_results6 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.25std0.csv')
+all_simulation_results7 = pd.read_csv('../round4_profitupdate/std0_new/bluff_eps0.3std0.csv')
 
-all_simulation_results8 = pd.read_csv('round4_profitupdate/std0_new/last_eps0std0.csv')
+all_simulation_results8 = pd.read_csv('../round4_profitupdate/std0_new/last_eps0std0.csv')
 
 df2 = [all_simulation_results1, all_simulation_results2, all_simulation_results3, all_simulation_results4,
               all_simulation_results5, all_simulation_results6, all_simulation_results7]

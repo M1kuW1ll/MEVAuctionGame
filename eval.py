@@ -1,8 +1,9 @@
+# Description: This file is used to run the simulation for the auction model. It uses the main_new.py file to run the simulation and saves the results to a csv file.
+
 import random
 import pandas as pd
 
-from main import Auction
-
+from main_new import Auction
 
 def generate_strategies(fixed_strategy=None, manual_values=None):
     if manual_values:
@@ -27,7 +28,7 @@ def run_simulation(strategies, delay, num_simulations):
     for _ in range(num_simulations):
         N, A, L, S, B = strategies.values()
         model = Auction(N, A, L, S, B, rate_public_mean=0.082, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
-                        T_mean=12, T_sd=0.1, delay=delay, rate_decrease = 0.03)
+                        T_mean=12, T_sd=0.1, delay=delay)
         for i in range(int(model.T * 100)):
             model.step()
         time_step = int(model.T * 100) - 1
@@ -52,6 +53,6 @@ for run in range(num_runs):
             all_sim_results.append(sim_results)
 
     concatenated_sim_results = pd.concat(all_sim_results, ignore_index=True)
-    filename = f'test_hpc_indidelay.csv'
+    filename = f'test.csv'
     concatenated_sim_results.to_csv(filename, index=False)
     print(f'Simulation results saved to {filename}')

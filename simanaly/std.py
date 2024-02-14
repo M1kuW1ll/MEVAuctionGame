@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import seaborn as sns
 # Read all your dataframes
-all_simulation_results1 = pd.read_csv('round4_profitupdate/eps/last_eps0std0.csv')
-all_simulation_results2 = pd.read_csv('round4_profitupdate/eps/last_eps0std0.05.csv')
-all_simulation_results3 = pd.read_csv('round4_profitupdate/eps/last_eps0std0.1.csv')
-all_simulation_results4 = pd.read_csv('round4_profitupdate/eps/last_eps0std0.15.csv')
-all_simulation_results5 = pd.read_csv('round4_profitupdate/eps/last_eps0std0.2.csv')
+all_simulation_results1 = pd.read_csv('../round4_profitupdate/eps/last_eps0std0.csv')
+all_simulation_results2 = pd.read_csv('../round4_profitupdate/eps/last_eps0std0.05.csv')
+all_simulation_results3 = pd.read_csv('../round4_profitupdate/eps/last_eps0std0.1.csv')
+all_simulation_results4 = pd.read_csv('../round4_profitupdate/eps/last_eps0std0.15.csv')
+all_simulation_results5 = pd.read_csv('../round4_profitupdate/eps/last_eps0std0.2.csv')
 
 
 # Initialize lists to store profit means for each dataframe
