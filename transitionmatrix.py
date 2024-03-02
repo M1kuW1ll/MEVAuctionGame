@@ -2,7 +2,7 @@ import itertools
 
 import pandas as pd
 import numpy as np
-from open_spiel.python.egt import alpharank
+from open_spiel.python.egt import alpharank, utils
 import ast
 file_path = 'payofftables/1008profiles_100.csv'
 payoff_df = pd.read_csv(file_path)
@@ -26,16 +26,34 @@ for _, row in payoff_df.iterrows():
 
     # Flatten the profile to get the strategy of each player
     flattened_profile = [strategy_to_int[strategy] for strategy in profile]
-    print(flattened_profile)
+
     # Calculate the payoff for each player
     for player_id, strategy in enumerate(flattened_profile):
         # Set the value at that index in the matrix to the player's payoff in the current profile
         payoff_matrices[player_id][tuple(flattened_profile)] = profits[player_id]
 
-# Compute the AlphaRank scores
-_, _, pi, _, _ = alpharank.compute(payoff_matrices, alpha=1)
 
-# Sort the strategy profiles by their scores in the stationary distribution
+def global_min_max_normalize(matrix_list) :
+    # Find global minimum and maximum across all matrices
+    global_min = np.min([np.min(matrix) for matrix in matrix_list])
+    global_max = np.max([np.max(matrix) for matrix in matrix_list])
+
+    # Normalize each matrix using the global min and max
+    normalized_matrices = [(matrix - global_min) / (global_max - global_min) for matrix in matrix_list]
+
+    return normalized_matrices
+
+payoff_matrices = global_min_max_normalize(payoff_matrices)
+
+payoffs_are_hpt_format = utils.check_payoffs_are_hpt(payoff_matrices)
+strat_labels = utils.get_strat_profile_labels(payoff_matrices, payoffs_are_hpt_format)
+# Compute the AlphaRank scores
+_, _, pi, _, _ = alpharank.compute(payoff_matrices, alpha=1, m=50)
+
+alpharank.print_results(payoff_matrices, payoffs_are_hpt_format, pi=pi)
+
+utils.print_rankings_table(payoff_matrices, pi, strat_labels, num_top_strats_to_print=10)
+
 ranking = np.argsort(-pi)
 
 # Print the ranked profiles along with their scores
@@ -44,6 +62,16 @@ for rank, index in enumerate(ranking, start=1):
     # Look up the strategy profile corresponding to the index
     profile = full_profiles[index]
     print(f"Rank {rank}: Profile {profile}, Alpha-Rank Score: {pi[index]}")
+
+# Sort the strategy profiles by their scores in the stationary distribution
+# ranking = np.argsort(-pi)
+#
+# # Print the ranked profiles along with their scores
+# print("Ranking of Strategy Profiles:")
+# for rank, index in enumerate(ranking[:20], start=1):
+#     # Look up the strategy profile corresponding to the index
+#     profile = full_profiles[index]
+#     print(f"Rank {rank}: Profile {profile}, Alpha-Rank Score: {pi[index]}")
 # num_players = 10
 # num_strategies = 3
 #

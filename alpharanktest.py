@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from open_spiel.python.egt import alpharank
 import ast
-file_path = '1008profiles_100.csv'
+file_path = 'test_payoff_distinguishable.csv'
 payoff_df = pd.read_csv(file_path)
 
 num_strategies = 3

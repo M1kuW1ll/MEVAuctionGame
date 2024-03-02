@@ -1,7 +1,7 @@
 import random
 import pandas as pd
 
-from canc import Auction
+from main_new import Auction
 
 
 def generate_strategies(fixed_strategy=None, manual_values=None):
@@ -26,8 +26,8 @@ def run_simulation(strategies, delay, num_simulations):
     sim_results = pd.DataFrame(columns=['winning_agent', 'winning_bid_value', 'winner_aggregated_signal', 'signal_max','Profit', 'Probability', 'True Profit', 'efficiency', 'auction_time', 'N', 'A', 'L', 'S', 'B', 'Delay'])  # Add 'Aggregated Signal Max' to columns
     for _ in range(num_simulations):
         N, A, L, S, B = strategies.values()
-        model = Auction(N, A, L, S, B, rate_public_mean=0.082, rate_public_sd=0.02, rate_private_mean=0.04, rate_private_sd=0.013,
-                        T_mean=12, T_sd=0, delay=delay, rate_decrease = 0.03)
+        model = Auction(N, A, L, S, B, rate_public_mean=0.082, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0,
+                        T_mean=12, T_sd=0, delay=delay, rate_decrease = 0.03, can_prob=0.3)
         for i in range(int(model.T * 100)):
             model.step()
         time_step = int(model.T * 100) - 1
@@ -36,7 +36,7 @@ def run_simulation(strategies, delay, num_simulations):
 
     return sim_results
 
-manual_values = {'N': 4, 'A': 4, 'L': 4, 'S': 0, 'B': 0}
+manual_values = {'N': 5, 'A': 5, 'L': 4, 'S': 0, 'B': 0}
 num_simulations = 10000
 num_runs = 1
 all_results = pd.DataFrame(columns=['Fixed Strategy', 'Chances of Winning', 'Mean Winning Bid Value', 'Delay'])
@@ -45,7 +45,7 @@ for run in range(num_runs):
     all_sim_results = []
     for fixed_strategy in [None]:
         print('Run ' + str(run))
-        for delay in range (1,11):
+        for delay in range (1, 11):
             print('Delay ' + str(delay))
             strategies = generate_strategies(fixed_strategy, manual_values)
             sim_results = run_simulation(strategies, delay, num_simulations)

@@ -291,51 +291,51 @@ class Auction(Model):
 
         self.decrease_rate = rate_decrease
 
-        self.cancel_time = norm.rvs(loc=11.5, scale = 0.1)
+        self.cancel_time = norm.rvs(loc=11.57, scale=0.1)
 
         probabilities = [i * 0.01 + 0.8 for i in range(15)]
 
         # Create Agents
         for i in range(self.num_naive):
-            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            pm = 0
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.5)
+            decrease_probability = np.random.uniform(0.25, 0.35)
             a = PlayerWithNaiveStrategy(i, self, pm, delay, probability, decrease_probability)
             self.schedule.add(a)
 
         for i in range(self.num_adapt):
-            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            pm = 0
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.5)
+            decrease_probability = np.random.uniform(0.25, 0.35)
             a = PlayerWithAdaptiveStrategy(i + self.num_naive, self, pm, delay, probability, decrease_probability)
             self.schedule.add(a)
 
         for i in range(self.num_lastminute):
-            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            pm = 0
             time_reveal_delta = 0
             time_estimate = 1200
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.5)
+            decrease_probability = np.random.uniform(0.25, 0.35)
             a = PlayerWithLastMinute(i + self.num_naive + self.num_adapt, self, pm,
                                      time_reveal_delta, time_estimate, delay, probability, decrease_probability)
             self.schedule.add(a)
 
         for i in range(self.num_stealth):
-            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            pm = 0
             time_reveal_delta = random.randint (10,20)
             time_estimate = 1200
             delay = 1
             probability = np.random.uniform(0.8, 1.0)
-            decrease_probability = np.random.uniform(0.3, 0.5)
+            decrease_probability = np.random.uniform(0.25, 0.35)
             a = PlayerWithStealthStrategy(i + self.num_naive + self.num_adapt + self.num_lastminute, self, pm,
                                          time_reveal_delta, time_estimate, delay, probability, decrease_probability)
             self.schedule.add(a)
 
         for i in range(self.num_bluff):
-            pm = norm.rvs(loc=0.00659, scale=0.0001)
+            pm = 0
             time_reveal_delta = random.randint (10,20)
             time_estimate = 1200
             bluff_value = np.random.uniform(0.25, 0.27)
@@ -437,7 +437,7 @@ class Auction(Model):
 
 # Setup and run the model
 model = Auction(4, 4, 4, 0, 0, rate_public_mean=0.082, rate_public_sd=0.02, rate_private_mean=0.04, rate_private_sd=0.013,
-                T_mean=12, T_sd=0, delay=1, rate_decrease=0.03)
+                T_mean=12, T_sd=0, delay=10, rate_decrease=0.03)
 
 for i in range(int(model.T * 100)):
     model.step()
@@ -533,30 +533,31 @@ signal_decrease_max = model_data["Signal Decrease Max"]
 # Pivot the DataFrame to have time steps as index and agents' bids as columns
 pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
 
-# Plotting
-# plt.figure(figsize=(20, 12))
-# plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(pivot_bids.columns))))
-#
-# fontsize = 12
-# for column in pivot_bids.columns:
-#     plt.plot(pivot_bids.index, pivot_bids[column], label=column, linewidth=2)
-#
-# # Adding other signals to the plot
-# plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
-# plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
-# plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
-# plt.plot(signal_decrease_max.index, -signal_decrease_max, label='Decrease Max', linewidth=3.5, color='red')
-# # Rest of the plotting code remains the same
-# plt.xlabel('Time Step', fontsize=fontsize)
-# plt.ylabel('Bid Value', fontsize=fontsize)
-# plt.legend(title='Agent ID', fontsize=12)
-# plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
-# plt.grid(axis='y', linestyle='--', linewidth=0.5, color='gray')
-# plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
-# plt.yticks(np.arange(-0.1, 0.27, 0.01), fontsize=fontsize)
-# plt.axvline(1200, color='k')
-#
-# plt.show()
+
+plt.figure(figsize=(20, 12))
+plt.gca().set_prop_cycle('color', plt.cm.inferno(np.linspace(0, 1, len(pivot_bids.columns))))
+
+fontsize = 12
+for column in pivot_bids.columns:
+    plt.plot(pivot_bids.index, pivot_bids[column], label=column, linewidth=2)
+
+# Adding other signals to the plot
+plt.plot(public_signals.index, public_signals, label='Public Signal', linewidth=3.5, color='green')
+plt.plot(private_signal_max.index, private_signal_max, label='Private Max', linewidth=3.5, color='blue')
+plt.plot(aggregated_signal_max.index, aggregated_signal_max, label='Aggregated Max', linewidth=3.5, color='indigo')
+plt.plot(signal_decrease_max.index, -signal_decrease_max, label='Decrease Max', linewidth=3.5, color='red')
+# Rest of the plotting code remains the same
+plt.xlabel('Time Step', fontsize=fontsize)
+plt.ylabel('Bid Value', fontsize=fontsize)
+plt.legend(title='Agent ID', fontsize=12)
+plt.title('Bids Received by Relay Across All Time Steps', fontsize=fontsize)
+plt.grid(axis='y', linestyle='--', linewidth=0.5, color='gray')
+plt.xticks(np.arange(0, 1300, 100), fontsize=fontsize)
+plt.yticks(np.arange(-0.1, 0.27, 0.01), fontsize=fontsize)
+plt.axvline(1200, color='k')
+
+plt.show()
+
 # all_bids = pd.concat(dfs)
 #
 # public_signals = model_data["Public Signal"]
@@ -583,7 +584,7 @@ pivot_bids = all_bids.pivot(index="Time Step", columns="Agent ID", values="Bid")
 # plt.axvline(1200, color='k')
 # plt.xlim(0), plt.ylim(0)
 # plt.show()
-
+#
 
 # for i in range(int(model.T * 100)):
 #     print(f"Data at time step {i}")

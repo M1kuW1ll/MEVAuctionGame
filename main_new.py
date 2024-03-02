@@ -21,7 +21,7 @@ class Player(Agent):
         self.bid_queue = deque(maxlen=(self.delay + self.model.global_delay))
 
     def update_aggregated_signal(self):
-        self.aggregated_signal = self.model.public_signal_value + self.private_signal_value
+        self.aggregated_signal = self.model.public_signal_value + self.private_signal_value - self.model.signal_decrease_value
 
     def step(self):
         self.update_aggregated_signal()
@@ -111,13 +111,14 @@ def get_aggregated_signal_max(model):
 
 class Auction(Model):
     def __init__(self, N, A, L, S, B, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd,
-                 T_mean, T_sd, delay,):
+                 T_mean, T_sd, delay, rate_decrease):
         self.num_agents = {'Naive': N, 'Adaptive': A, 'LastMinute': L, 'Stealth': S, 'Bluff': B}
         self.global_delay = delay
         self.T = norm.rvs(loc=T_mean, scale=T_sd)
+        self.cancel_time = norm.rvs(loc=11.57, scale=0.1)
         self.schedule = SimultaneousActivation(self)
         self.setup_agents()
-        self.setup_signals(rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd)
+        self.setup_signals(rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, rate_decrease)
         self.setup_bids()
         self.setup_winner()
         self.datacollector = DataCollector(
@@ -139,7 +140,7 @@ class Auction(Model):
         agent_id = 0
         for strategy, count in self.num_agents.items():
             for _ in range(count):
-                pm = norm.rvs(loc=0.00659, scale=0.0001)
+                pm = 0
                 delay = 1
                 probability = np.random.uniform(0.8, 1.0)
                 if strategy == 'Naive':
@@ -165,15 +166,18 @@ class Auction(Model):
                 self.schedule.add(agent)
                 agent_id += 1
 
-    def setup_signals(self, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd):
+    def setup_signals(self, rate_public_mean, rate_public_sd, rate_private_mean, rate_private_sd, rate_decrease):
         # Initialize signal parameters
         self.public_signal = 0
         self.public_signal_value = 0
         self.private_signal = 0
         self.private_signal_max = 0
         self.aggregated_signal_max = 0
+        self.signal_decrease = 0
+        self.signal_decrease_value = 0
         self.public_lambda = norm.rvs(loc=rate_public_mean, scale=rate_public_sd)
         self.private_lambda = norm.rvs(loc=rate_private_mean, scale=rate_private_sd)
+        self.rate_decrease = rate_decrease
 
     def setup_bids(self):
         self.max_bids = []
@@ -211,7 +215,15 @@ class Auction(Model):
                 if random.random() < agent.probability :
                     agent.private_signal_value += private_signal_value
 
-        self.aggregated_signal_max = self.public_signal_value + self.private_signal_max
+        if self.schedule.time > int(self.cancel_time * 100):
+            new_signal_decrease = poisson.rvs(mu = self.rate_decrease*1200/50)
+            self.signal_decrease += new_signal_decrease
+
+            for _ in range (new_signal_decrease):
+                signal_decrease_value = 0.002
+                self.signal_decrease_value += signal_decrease_value
+
+        self.aggregated_signal_max = self.public_signal_value + self.private_signal_max - self.signal_decrease_value
 
         self.schedule.step()
 
@@ -230,7 +242,6 @@ class Auction(Model):
             for agent in self.schedule.agents :
                 if agent.unique_id == winner_id :
                     self.winner_profit = aggregated_signal_at_time_of_bid - max_bid
-                    self.winner_trueprofit = aggregated_signal_at_time_of_bid - max_bid - agent.pm
                     self.winner_aggregated_signal = aggregated_signal_at_time_of_bid
                     self.winner_probability = agent.probability
 
@@ -244,7 +255,7 @@ class Auction(Model):
         self.datacollector.collect(self)
 
 # Function to run the model and collect data
-model = Auction(N=4, A=4, L=4, S=0, B=0, rate_public_mean=0.082, rate_public_sd=0.02, rate_private_mean=0.04, rate_private_sd=0.013, T_mean=12, T_sd=0, delay=1)
+model = Auction(N=4, A=4, L=0, S=0, B=0, rate_public_mean=0.082, rate_public_sd=0, rate_private_mean=0.04, rate_private_sd=0, T_mean=12, T_sd=0, delay=10, rate_decrease = 0.01)
 for i in range(int(model.T * 100)):
     model.step()
 
@@ -265,30 +276,29 @@ print(f"Winning Bid of Each Step: {model.max_bids}")
 print(f"Winning Agent of Each Step: {model.winning_agents}")
 
 
-# Print table for each step
-for time_step in range(int(model.T * 100)):
-    current_bids_at_time_step = model_data.loc[time_step, 'Current Bids']
-    bid_agents_at_time_step = model_data.loc[time_step, 'Agents']
-    if current_bids_at_time_step :
-        bids, aggregated_signals = zip(*current_bids_at_time_step)
-
-        df = pd.DataFrame({
-            'Bids' : bids,
-            'Aggregated Signals' : aggregated_signals,
-            'Agents' : bid_agents_at_time_step
-        })
-        print(f"Data for time step {time_step}:")
-        print(df)
-        print("\n")
-    else :
-        print(f"Data for time step {time_step}: Empty Dataframe. No bids recorded on the relay.\n")
+# # Print table for each step
+# for time_step in range(int(model.T * 100)):
+#     current_bids_at_time_step = model_data.loc[time_step, 'Current Bids']
+#     bid_agents_at_time_step = model_data.loc[time_step, 'Agents']
+#     if current_bids_at_time_step :
+#         bids, aggregated_signals = zip(*current_bids_at_time_step)
+#
+#         df = pd.DataFrame({
+#             'Bids' : bids,
+#             'Aggregated Signals' : aggregated_signals,
+#             'Agents' : bid_agents_at_time_step
+#         })
+#         print(f"Data for time step {time_step}:")
+#         print(df)
+#         print("\n")
+#     else :
+#         print(f"Data for time step {time_step}: Empty Dataframe. No bids recorded on the relay.\n")
 
 print('Winning Agent ID: ' + str(model.winning_agents[-1:][0]))
 print('Winning bid value: ' + str(model.max_bids[-1:][0]))
 print(f"Winner Profit: {model.winner_profit}")
 print(f"Winner Total Signal: {model.winner_aggregated_signal}")
 print(f"Winner Probility: {model.winner_probability}")
-print('Winning bid time: ' + str(time_step) + ' ms')
 print(f"Auction Efficiency: {model.auction_efficiency}")
 
 #Plotting

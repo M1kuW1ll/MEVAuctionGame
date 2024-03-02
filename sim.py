@@ -189,7 +189,7 @@ class Auction(Model):
 
     def create_players(self, player_strategies) :
         pm = 0.00659
-        delays = [1] * 2 + [3] * 2 + [5] * 6  # Pattern of delays for the players
+        delays = [1] * 10  # Pattern of delays for the players
 
         # Additional parameters for LastMinute strategy
         time_reveal_delta = 0

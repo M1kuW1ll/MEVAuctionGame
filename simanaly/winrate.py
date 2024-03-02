@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-all_simulation_results = pd.read_csv('cancellation_4440.csv')
+all_simulation_results = pd.read_csv('../cancellation_4440.csv')
 num_naive_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 0) & (all_simulation_results['winning_agent'] <= 3)])
 num_adapt_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 4) & (all_simulation_results['winning_agent'] <= 7)])
 num_lastminute_winning = len(all_simulation_results[(all_simulation_results['winning_agent'] >= 2) & (all_simulation_results['winning_agent'] <= 2)])
